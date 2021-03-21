@@ -4,6 +4,7 @@ class World
     @water = Res.img(:map_water, true, true)
     @bgm = Res.song("world#{num}", false, '.mp3')
 
+    @stage_index = stage_num
     @water_timer = 0
 
     ConnecMan.play_song(@bgm)

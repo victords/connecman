@@ -1,10 +1,11 @@
 class Player
-  attr_reader :name, :last_world, :last_stage, :scores
+  attr_reader :name, :completed, :last_stage, :last_world, :scores
 
-  def initialize(name = '-', last_world = 1, last_stage = 1, scores = [])
+  def initialize(name = '-', completed = false, last_stage = 1, scores = [])
     @name = name
-    @last_world = last_world
+    @completed = completed
     @last_stage = last_stage
+    @last_world = (last_stage - 1) / 6 + 1
     @scores = scores
 
     # TODO learned symbols

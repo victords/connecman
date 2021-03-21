@@ -9,7 +9,7 @@ end
 
 class ConnecMan
   class << self
-    attr_reader :state, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
+    attr_reader :state, :saves_path, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
                 :default_font, :image_font
 
     def initialize(dir)
@@ -96,12 +96,18 @@ class ConnecMan
       start_game
     end
 
-    def load_game
-
+    def load_game(name)
+      data = File.read("#{@saves_path}/#{name}").split('#', -1)
+      completed = data[0] == '!'
+      level = data[1].to_i
+      scores = data[2].split(',').map(&:to_i)
+      @player = Player.new(name, completed, level, scores)
+      start_game
     end
 
     def start_game
-      @world = World.new(@player.last_world, @player.last_stage)
+      stage_num = (@player.last_stage - 1) % 6
+      @world = World.new(@player.last_world, stage_num)
       @state = :world_map
     end
 
