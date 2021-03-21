@@ -16,28 +16,17 @@ class ConnecManWindow < GameWindow
     ConnecMan.initialize(dir)
     super(Const::SCR_W, Const::SCR_H, ConnecMan.full_screen)
 
-    @state = :main_menu
-    @menu = Menu.new
-    @menu.show_main_menu
+    ConnecMan.show_main_menu
   end
 
   def update
     KB.update
     Mouse.update
-
-    case @state
-    when :opening
-
-    end
+    ConnecMan.update
   end
 
   def draw
-    case @state
-    when :opening
-
-    when :main_menu
-      @menu.draw
-    end
+    ConnecMan.draw
   end
 end
 

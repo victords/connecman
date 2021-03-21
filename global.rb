@@ -1,4 +1,6 @@
 require 'fileutils'
+require_relative 'player'
+require_relative 'world'
 
 module Const
   SCR_W = 800
@@ -6,22 +8,32 @@ module Const
 end
 
 class ConnecMan
-  LANGUAGES = {
-    0 => :english,
-    1 => :portuguese,
-    2 => :spanish
-  }
-
   class << self
-    attr_reader :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume
+    attr_reader :state, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
+                :default_font, :image_font
 
     def initialize(dir)
+      Res.initialize
+
       @options_path = "#{dir}/config"
       @saves_path = "#{dir}/saves"
 
+      @langs = []
+      @texts = {}
+      files = Dir["#{Res.prefix}text/*.txt"]
+      files.each do |f|
+        lang = f.split('/')[-1].chomp('.txt').to_sym
+        @langs << lang
+        @texts[lang] = {}
+        File.open(f).each do |l|
+          parts = l.split "\t"
+          @texts[lang][parts[0].to_sym] = parts[-1].chomp
+        end
+      end
+
       if File.exist?(@options_path)
         content = File.read(@options_path).split(',')
-        @language = LANGUAGES[content[0].to_i]
+        @language = @langs[content[0].to_i]
         @shortcut_keys = content[1] == '+'
         @mouse_control = content[2] == '+'
         @full_screen = content[3] == '+'
@@ -31,10 +43,13 @@ class ConnecMan
         FileUtils.mkdir_p(dir)
         create_options
       end
+
+      @default_font = Res.font(:corbel, 24)
+      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 30, 40, 30, true)
     end
 
     def create_options
-      @language = LANGUAGES[0]
+      @language = @langs[0]
       @shortcut_keys = true
       @mouse_control = true
       @full_screen = true
@@ -45,12 +60,17 @@ class ConnecMan
 
     def save_options
       File.open(@options_path, 'w') do |f|
-        lang = LANGUAGES.key(@language)
+        lang = @langs.index(@language)
         shortcut_keys = @shortcut_keys ? '+' : '-'
         mouse_control = @mouse_control ? '+' : '-'
         full_screen = @full_screen ? '+' : '-'
         f.write("#{lang},#{shortcut_keys},#{mouse_control},#{full_screen},#{@music_volume},#{@sound_volume}")
       end
+    end
+
+    def show_main_menu
+      @main_menu = Menu.new
+      @state = :main_menu
     end
 
     def play_song(song)
@@ -61,6 +81,46 @@ class ConnecMan
       end
       song.volume = @music_volume * 0.1
       song.play(true)
+    end
+
+    def play_sound(id)
+      Res.sound(id).play(@sound_volume * 0.1)
+    end
+
+    def text(key)
+      @texts[@language].fetch(key, '???')
+    end
+
+    def new_game
+      @player = Player.new
+      start_game
+    end
+
+    def load_game
+
+    end
+
+    def start_game
+      @world = World.new(@player.last_world, @player.last_stage)
+      @state = :world_map
+    end
+
+    def update
+      case @state
+      when :main_menu
+        @main_menu.update
+      when :world_map
+        @world.update
+      end
+    end
+
+    def draw
+      case @state
+      when :main_menu
+        @main_menu.draw
+      when :world_map
+        @world.draw
+      end
     end
   end
 end

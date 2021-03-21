@@ -1,0 +1,9 @@
+lang_name			English
+play				Play
+instructions		Instructions
+options				Options
+more				More...
+exit				Exit
+new_game			New Game
+continue			Continue
+back				Back

@@ -1,0 +1,9 @@
+lang_name			Español
+play				Jugar
+instructions		Instrucciones
+options				Opciones
+more				Más...
+exit				Salir
+new_game			Nuevo Juego
+continue			Continuar
+back				Volver
