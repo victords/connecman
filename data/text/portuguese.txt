@@ -7,3 +7,5 @@ exit				Sair
 new_game			Novo Jogo
 continue			Continuar
 back				Voltar
+previous			Anterior
+next				Próximo

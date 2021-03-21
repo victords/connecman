@@ -19,6 +19,10 @@ class ConnecManWindow < GameWindow
     ConnecMan.show_main_menu
   end
 
+  def needs_cursor?
+    false
+  end
+
   def update
     KB.update
     Mouse.update

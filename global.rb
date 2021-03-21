@@ -9,8 +9,8 @@ end
 
 class ConnecMan
   class << self
-    attr_reader :state, :saves_path, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
-                :default_font, :image_font
+    attr_reader :state, :saves_path, :langs, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
+                :default_font, :image_font, :text_helper
 
     def initialize(dir)
       Res.initialize
@@ -46,6 +46,8 @@ class ConnecMan
 
       @default_font = Res.font(:corbel, 24)
       @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 30, 40, 30, true)
+      @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
+      @cursor = Res.img(:cursor_Default, true)
     end
 
     def create_options
@@ -88,7 +90,7 @@ class ConnecMan
     end
 
     def text(key)
-      @texts[@language].fetch(key, '???')
+      @texts[@language].fetch(key.to_sym, '???').gsub("\\n", "\n")
     end
 
     def new_game
@@ -127,6 +129,8 @@ class ConnecMan
       when :world_map
         @world.draw
       end
+
+      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10)
     end
   end
 end
