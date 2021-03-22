@@ -6,6 +6,7 @@ more				More...
 exit				Exit
 new_game			New Game
 continue			Continue
+no_saved_games		No saved games
 back				Back
 previous			Previous
 next				Next
@@ -16,7 +17,7 @@ instructions_3		ConnecMan is composed by 25 challenging levels, distributed by f
 instructions_4		Making ConnecMan even more interesting, in some levels you may have items to use, helping you at achieving the goal. There are three kinds of items, each one with a function. Explore the 25 levels to find out their uses!
 instructions_5		In ConnecMan you don't need to worry about forgetting to save the game: when you click 'Exit', the game automatically asks you whether to save your progress.\n\nIn the status screen, you can see how much progress you have made so far. The nisled letters or numbers you have learned are shown in the bottom of this screen, in the following way:
 instructions_6		CONTROLS\nIn 'Options' you can set the game controls to mouse or keyboard. Using the mouse, all actions are made by a single click of the left button. When set to keyboard, it works as follows:\n- Directional keys (arrows): navigate in menus and move the cursor in the game acreen.\n- Space bar: execute an action (select an option in a menu, select a piece or an item in the main game).\n- Tab: switch between the main game screen and the panel, located below it. Also used to switch between the text field and the buttons in the save game menu.
-instructions_7		SHORTCUT KEYS\nAlso in 'Options', you can turn these ON or OFF. When ON, their functions are:\n- F4: switch between full screen and windowed mode.\n- C: switch the game controls between mouse and keyboard.\n- P: pause the game and open the menu.\n- R: restart current level.\n- W: select, when available, a 'Wave Transmitter'.\n- H: select, when available, an 'Hourglass'.\n- D: select, when available, a 'Dynamite'.
+instructions_7		SHORTCUT KEYS\nAlso in 'Options', you can turn these ON or OFF. When ON, their functions are:\n- Alt+Enter: switch between full screen and windowed mode.\n- C: switch the game controls between mouse and keyboard.\n- P: pause the game and open the menu.\n- R: restart current level.\n- W: select, when available, a 'Wave Transmitter'.\n- H: select, when available, an 'Hourglass'.\n- D: select, when available, a 'Dynamite'.
 instructions_8		Brave adventurer, your ConnecMan tutorial has come to an end. Now begin your journey through the Nislands, and make your brain work to solve the 25 puzzles!
 about				About
 hall_of_fame		Hall of Fame
@@ -24,3 +25,5 @@ credits				Credits
 about_0				ConnecMan is an explorer who decided to take a journey through the mysterious Nislands. There, he found traces of an ancient civilization, which appeared to have a very rich culture.\nSo, his aim is to unravel the mysteries of this civilization and try to decipher their beautiful language, which he called Nisled.
 about_1				Studying the crystal pieces he found in those islands, ConnecMan discovered that Nisled is an interesting language, for it's composed by an 'alphabet' and some more complex symbols, generally representing concrete or abstract things.
 about_2				Carved in each of the crystal pieces is a Nisled letter or algarism, and combining similar pieces, a lot of energy is spread, revealing part of the knowledge left by that civilization. So, ConnecMan decided to travel from island to island, combining crystal pieces to learn more. And here's your part in this story: help ConnecMan to decipher the Nisled enigmas and learn this eccentric language too!
+no_players			No players in the Hall of Fame
+credits_info		Design, programming, graphics and music by:\nVictor David Santos\n\nSpecial thanks to:\nJoão Carlos dos Santos\nNathália David Santos\nYuri David Santos\nZuleica Hiromi Alves\n\nIn memory of\nLuiz Carlos dos Santos

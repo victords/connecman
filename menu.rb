@@ -93,19 +93,19 @@ class Menu
     @page_index = start_index
     @controls[:continue] = []
     if @saves.size > 4 && start_index > 0
-      @controls[:continue] << Button.new(384, 224, nil, nil, :main_btnUp) {
+      @controls[:continue] << Button.new(384, 204, nil, nil, :main_btnUp) {
         set_continue_buttons(@page_index - 1)
       }
     end
     limit = [@saves.size, 4].min - 1
     (0..limit).each do |i|
       name = @saves[start_index + i]
-      @controls[:continue] << Button.new(325, 240 + i * 40, ConnecMan.default_font, name, :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
+      @controls[:continue] << Button.new(325, 220 + i * 40, ConnecMan.default_font, name, :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
         ConnecMan.load_game(name)
       }
     end
     if @saves.size > 4 && start_index < @saves.size - 4
-      @controls[:continue] << Button.new(384, 396, nil, nil, :main_btnDown) {
+      @controls[:continue] << Button.new(384, 376, nil, nil, :main_btnDown) {
         set_continue_buttons(@page_index + 1)
       }
     end
@@ -153,7 +153,9 @@ class Menu
       ConnecMan.default_font.draw_text_rel(@title, Const::SCR_W / 2, y + 25, 0, 0.5, 0, 1, 1, 0xffffff00)
     end
 
-    if @state == :instructions
+    if @state == :continue && @saves.empty?
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text(:no_saved_games), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0, 1, 1, 0xffffffff)
+    elsif @state == :instructions
       ConnecMan.text_helper.write_breaking(ConnecMan.text("instructions_#{@page_index}"), 120, 190, 560, :justified, 0xffffff)
       if @page_index < 5
         @instructions_images[@page_index].draw(120, 330, 0)
@@ -161,12 +163,18 @@ class Menu
         @instructions_images[@page_index + ConnecMan.langs.index(ConnecMan.language)].draw(120, 330, 0)
       end
     elsif @state == :about
-      ConnecMan.text_helper.write_breaking(ConnecMan.text("about_#{@page_index}"), 120, 190, 560, :justified, 0xffffff)
+      ConnecMan.text_helper.write_breaking(ConnecMan.text("about_#{@page_index}"), 120, 190, 560, :justified, 0xffffff, 255, 0, 1, 1)
     elsif @state == :hall_of_fame
-      @hall_of_fame.each_with_index do |h, i|
-        ConnecMan.text_helper.write_line(h[:name], 180, 155 + i * 30, :left, 0xffffff)
-        ConnecMan.text_helper.write_line(h[:score].to_s, 620, 155 + i * 30, :right, 0xffffff)
+      if @hall_of_fame.empty?
+        ConnecMan.default_font.draw_text_rel(ConnecMan.text(:no_players), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0, 1, 1, 0xffffffff)
+      else
+        @hall_of_fame.each_with_index do |h, i|
+          ConnecMan.text_helper.write_line(h[:name], 180, 155 + i * 30, :left, 0xffffff)
+          ConnecMan.text_helper.write_line(h[:score].to_s, 620, 155 + i * 30, :right, 0xffffff)
+        end
       end
+    elsif @state == :credits
+      ConnecMan.text_helper.write_breaking(ConnecMan.text(:credits_info), Const::SCR_W / 2, 190, 560, :center, 0xffffff, 255, 0, 0.75, 0.75)
     end
 
     @controls[@state].each(&:draw) if @state != :main

@@ -20,7 +20,7 @@ class ConnecMan
 
       @langs = []
       @texts = {}
-      files = Dir["#{Res.prefix}text/*.txt"]
+      files = Dir["#{Res.prefix}text/*.txt"].sort
       files.each do |f|
         lang = f.split('/')[-1].chomp('.txt').to_sym
         @langs << lang
