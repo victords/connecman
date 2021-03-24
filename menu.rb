@@ -1,4 +1,5 @@
 require_relative 'global'
+require_relative 'options'
 
 class Menu
   def initialize
@@ -15,6 +16,9 @@ class Menu
           set_state :instructions
         },
         Button.new(90, 305, ConnecMan.default_font, ConnecMan.text(:options), :main_btn2, 0x333300, 0, 0x666633, 0x333300, false, true, 8) {
+          Options.initialize {
+            set_state :main
+          }
           set_state :options
         },
         Button.new(90, 345, ConnecMan.default_font, ConnecMan.text(:more), :main_btn2, 0x333300, 0, 0x666633, 0x333300, false, true, 8) {
@@ -133,7 +137,11 @@ class Menu
   end
 
   def update
-    @controls[@state].each(&:update)
+    if @state == :options
+      Options.update
+    else
+      @controls[@state].each(&:update)
+    end
   end
 
   def draw
@@ -144,7 +152,7 @@ class Menu
     board = case @state
             when :play, :continue, :more
               @board1
-            when :instructions, :about, :hall_of_fame, :credits
+            when :instructions, :options, :about, :hall_of_fame, :credits
               @board2
             end
     if board
@@ -160,7 +168,7 @@ class Menu
       if @page_index < 5
         @instructions_images[@page_index].draw(120, 330, 0)
       elsif @page_index == 5
-        @instructions_images[@page_index + ConnecMan.langs.index(ConnecMan.language)].draw(120, 330, 0)
+        @instructions_images[@page_index + ConnecMan.language_index].draw(120, 330, 0)
       end
     elsif @state == :about
       ConnecMan.text_helper.write_breaking(ConnecMan.text("about_#{@page_index}"), 120, 190, 560, :justified, 0xffffff, 255, 0, 1, 1)
@@ -177,6 +185,10 @@ class Menu
       ConnecMan.text_helper.write_breaking(ConnecMan.text(:credits_info), Const::SCR_W / 2, 190, 560, :center, 0xffffff, 255, 0, 0.75, 0.75)
     end
 
-    @controls[@state].each(&:draw) if @state != :main
+    if @state == :options
+      Options.draw
+    else
+      @controls[@state].each(&:draw) if @state != :main
+    end
   end
 end

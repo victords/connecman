@@ -19,6 +19,20 @@ instructions_5		In ConnecMan you don't need to worry about forgetting to save th
 instructions_6		CONTROLS\nIn 'Options' you can set the game controls to mouse or keyboard. Using the mouse, all actions are made by a single click of the left button. When set to keyboard, it works as follows:\n- Directional keys (arrows): navigate in menus and move the cursor in the game acreen.\n- Space bar: execute an action (select an option in a menu, select a piece or an item in the main game).\n- Tab: switch between the main game screen and the panel, located below it. Also used to switch between the text field and the buttons in the save game menu.
 instructions_7		SHORTCUT KEYS\nAlso in 'Options', you can turn these ON or OFF. When ON, their functions are:\n- Alt+Enter: switch between full screen and windowed mode.\n- C: switch the game controls between mouse and keyboard.\n- P: pause the game and open the menu.\n- R: restart current level.\n- W: select, when available, a 'Wave Transmitter'.\n- H: select, when available, an 'Hourglass'.\n- D: select, when available, a 'Dynamite'.
 instructions_8		Brave adventurer, your ConnecMan tutorial has come to an end. Now begin your journey through the Nislands, and make your brain work to solve the 25 puzzles!
+save				Save
+cancel				Cancel
+on					ON
+off					OFF
+general				General
+language			Language
+shortcut_keys		Shortcut keys
+controls			Controls
+mouse				Mouse
+keyboard			Keyboard
+audio_graphics		Audio/Graphics
+full_screen			Full screen
+music_volume		Music volume
+sound_volume		Sound volume
 about				About
 hall_of_fame		Hall of Fame
 credits				Credits

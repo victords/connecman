@@ -9,8 +9,8 @@ end
 
 class ConnecMan
   class << self
-    attr_reader :state, :saves_path, :langs, :language, :shortcut_keys, :mouse_control, :full_screen, :music_volume, :sound_volume,
-                :default_font, :image_font, :text_helper
+    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :music_volume
+    attr_accessor :language, :shortcut_keys, :mouse_control, :full_screen, :sound_volume
 
     def initialize(dir)
       Res.initialize
@@ -62,7 +62,7 @@ class ConnecMan
 
     def save_options
       File.open(@options_path, 'w') do |f|
-        lang = @langs.index(@language)
+        lang = language_index
         shortcut_keys = @shortcut_keys ? '+' : '-'
         mouse_control = @mouse_control ? '+' : '-'
         full_screen = @full_screen ? '+' : '-'
@@ -89,6 +89,12 @@ class ConnecMan
       Res.sound(id).play(@sound_volume * 0.1)
     end
 
+    def music_volume=(value)
+      @music_volume = value
+      cur_song = Gosu::Song.current_song
+      cur_song.volume = value * 0.1 if cur_song
+    end
+
     def text(key)
       @texts[@language].fetch(key.to_sym, '???').gsub("\\n", "\n")
     end
@@ -111,6 +117,21 @@ class ConnecMan
       stage_num = (@player.last_stage - 1) % 6
       @world = World.new(@player.last_world, stage_num)
       @state = :world_map
+    end
+
+    def language_index
+      @langs.index(@language)
+    end
+
+    def change_language(delta)
+      index = language_index
+      index += delta
+      if index < 0
+        index = @langs.size - 1
+      elsif index >= @langs.size
+        index = 0
+      end
+      @language = @langs[index]
     end
 
     def update
