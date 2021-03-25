@@ -146,6 +146,10 @@ class ConnecMan
     end
 
     def update
+      if KB.key_pressed?(Gosu::KB_RETURN) && (KB.key_down?(Gosu::KB_LEFT_ALT) || KB.key_down?(Gosu::KB_RIGHT_ALT))
+        @full_screen = !@full_screen
+      end
+
       case @state
       when :main_menu
         @main_menu.update
