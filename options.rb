@@ -10,11 +10,11 @@ class Options
           change_setting(i, false)
         }
       end
-      @controls << Button.new(240, 450, ConnecMan.default_font, ConnecMan.text(:save), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
+      @controls << CButton.new(240, 450, ConnecMan.default_font, :save, :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
         ConnecMan.save_options
         back_action.call
       }
-      @controls << Button.new(410, 450, ConnecMan.default_font, ConnecMan.text(:cancel), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
+      @controls << CButton.new(410, 450, ConnecMan.default_font, :cancel, :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
         revert_options
         back_action.call
       }

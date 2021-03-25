@@ -19,6 +19,20 @@ instructions_5		Ao jogar ConnecMan, você não precisa se preocupar com esquecer
 instructions_6		CONTROLES\nNo menu 'Opções', você pode alternar os controles entre mouse e teclado. No caso do mouse, todos os comandos do jogo - inclusive a navegação por menus - são executados com cliques simples com o botão esquerdo. Para o teclado, veja quais teclas serão utilizadas:\n- Direcionais (setas): para navegar entre itens em menus e para mover o cursor na tela principal do jogo.\n- Barra de espaço: para executar todas as ações, tanto em menus (selecionar uma opção) quanto no jogo (selecionar uma peça, utilizar um item).\n- Tab: usada para alternar entre a tela do jogo e o painel, localizado na parte inferior da tela. Também serve para alternar o foco, no menu de salvar jogo, entre o campo de texto e os botões do menu.
 instructions_7		TECLAS DE ATALHO\nTambém no menu 'Opções', você pode ativá-las ou desativá-las. Quando habilitadas, veja suas funções:\n- Alt+Enter: a qualquer momento, alterna entre a exibição em tela cheia e em janela.\n- C: alterna automaticamente o tipo de controle (mouse ou teclado).\n- P: pausa o jogo, abrindo o menu.\n- R: reinicia a fase atual.\n- W: utiliza, quando disponível, um item 'Transmissor de Ondas'.\n- H: utiliza, quando disponível, um item 'Ampulheta'.\n- D: utiliza, quando disponível, um item 'Dinamite'.
 instructions_8		Bravo aventureiro, aqui acaba seu tutorial sobre ConnecMan. Agora, é só partir em sua jornada pelas ilhas de Nisland, e desafiar seu cérebro nas 25 emocionantes fases!
+save				Salvar
+cancel				Cancelar
+on					Sim
+off					Não
+general				Geral
+language			Idioma
+shortcut_keys		Teclas de atalho
+controls			Controles
+mouse				Mouse
+keyboard			Teclado
+audio_graphics		Áudio/Gráficos
+full_screen			Tela cheia
+music_volume		Volume da música
+sound_volume		Volume dos sons
 about				Sobre
 hall_of_fame		Hall da Fama
 credits				Créditos

@@ -1,6 +1,9 @@
 require 'fileutils'
 require_relative 'player'
 require_relative 'world'
+require_relative 'event'
+
+include MiniGL
 
 module Const
   SCR_W = 800
@@ -9,8 +12,8 @@ end
 
 class ConnecMan
   class << self
-    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :music_volume
-    attr_accessor :language, :shortcut_keys, :mouse_control, :full_screen, :sound_volume
+    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume
+    attr_accessor :shortcut_keys, :mouse_control, :full_screen, :sound_volume, :language_changed
 
     def initialize(dir)
       Res.initialize
@@ -48,6 +51,8 @@ class ConnecMan
       @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 30, 40, 30, true)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
       @cursor = Res.img(:cursor_Default, true)
+
+      @language_changed = Event.new
     end
 
     def create_options
@@ -75,6 +80,10 @@ class ConnecMan
       @state = :main_menu
     end
 
+    def text(key)
+      @texts[@language].fetch(key.to_sym, '???').gsub("\\n", "\n")
+    end
+
     def play_song(song)
       cur_song = Gosu::Song.current_song
       if cur_song
@@ -89,14 +98,31 @@ class ConnecMan
       Res.sound(id).play(@sound_volume * 0.1)
     end
 
+    def language_index
+      @langs.index(@language)
+    end
+
+    def change_language(delta)
+      index = language_index
+      index += delta
+      if index < 0
+        index = @langs.size - 1
+      elsif index >= @langs.size
+        index = 0
+      end
+      @language = @langs[index]
+      @language_changed.invoke
+    end
+
+    def language=(value)
+      @language = value
+      @language_changed.invoke
+    end
+
     def music_volume=(value)
       @music_volume = value
       cur_song = Gosu::Song.current_song
       cur_song.volume = value * 0.1 if cur_song
-    end
-
-    def text(key)
-      @texts[@language].fetch(key.to_sym, '???').gsub("\\n", "\n")
     end
 
     def new_game
@@ -119,21 +145,6 @@ class ConnecMan
       @state = :world_map
     end
 
-    def language_index
-      @langs.index(@language)
-    end
-
-    def change_language(delta)
-      index = language_index
-      index += delta
-      if index < 0
-        index = @langs.size - 1
-      elsif index >= @langs.size
-        index = 0
-      end
-      @language = @langs[index]
-    end
-
     def update
       case @state
       when :main_menu
@@ -152,6 +163,19 @@ class ConnecMan
       end
 
       @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10)
+    end
+  end
+end
+
+class CButton < Button
+  def initialize(x, y = nil, font = nil, text_id = nil, img = nil,
+                 text_color = 0, disabled_text_color = 0, over_text_color = 0, down_text_color = 0,
+                 center_x = true, center_y = true, margin_x = 0, margin_y = 0, width = nil, height = nil,
+                 params = nil, retro = nil, scale_x = 1, scale_y = 1, anchor = nil, &action)
+    @text_id = text_id
+    super(x, y, font, ConnecMan.text(text_id), img, text_color, disabled_text_color, over_text_color, down_text_color, center_x, center_y, margin_x, margin_y, width, height, params, retro, scale_x, scale_y, anchor, &action)
+    ConnecMan.language_changed += Proc.new do
+      self.text = ConnecMan.text(@text_id)
     end
   end
 end
