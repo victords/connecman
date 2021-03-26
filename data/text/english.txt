@@ -41,3 +41,10 @@ about_1				Studying the crystal pieces he found in those islands, ConnecMan disc
 about_2				Carved in each of the crystal pieces is a Nisled letter or algarism, and combining similar pieces, a lot of energy is spread, revealing part of the knowledge left by that civilization. So, ConnecMan decided to travel from island to island, combining crystal pieces to learn more. And here's your part in this story: help ConnecMan to decipher the Nisled enigmas and learn this eccentric language too!
 no_players			No players in the Hall of Fame
 credits_info		Design, programming, graphics and music by:\nVictor David Santos\n\nSpecial thanks to:\nJoão Carlos dos Santos\nNathália David Santos\nYuri David Santos\nZuleica Hiromi Alves\n\nIn memory of\nLuiz Carlos dos Santos
+world_1				Hard Rock Island
+world_2				Cloudy Sky Island
+world_3				Frost Lake Island
+world_4				Volcain Island
+world_5				Four Pillars Island
+player				PLAYER: 
+score				SCORE: 

@@ -12,7 +12,7 @@ end
 
 class ConnecMan
   class << self
-    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume
+    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume, :player
     attr_accessor :shortcut_keys, :mouse_control, :full_screen, :sound_volume, :language_changed
 
     def initialize(dir)
@@ -48,7 +48,7 @@ class ConnecMan
       end
 
       @default_font = Res.font(:corbel, 24)
-      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 30, 40, 30, true)
+      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 31, 41, 30)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
       @cursor = Res.img(:cursor_Default, true)
 

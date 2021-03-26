@@ -41,3 +41,10 @@ about_1				Continuando el estudio de las piezas de cristal, que emanaban una ene
 about_2				En cada cristal tiene una letra o un número Nisled registrados, y combinandose cristales iguales, una grande energía es puesta en libertad, que contiene una porción de los conocimientos dejados por esa civilización. Así ConnecMan decide viajar por las distintas islas en busca de más conocimiento, combinando todas las piezas de cristal que encuentre. Y aquí viene tu parte en esta historia: ayudar ConnecMan a descifrar los rompecabezas y aprender Nisled, este lenguaje inusual, ¡usted también!
 no_players			Ningún jugador en el Salón de la Fama
 credits_info		Diseño, programación, gráficos y música de:\nVictor David Santos\n\nAgradecimientos especiales:\nJoão Carlos dos Santos\nNathália David Santos\nYuri David Santos\nZuleica Hiromi Alves\n\nEn memória de\nLuiz Carlos dos Santos
+world_1				Isla de Hard Rock
+world_2				Isla de Cielo Nublado
+world_3				Isla de Lago Frío
+world_4				Isla de Volcaña
+world_5				Isla de los Cuatro Pilares
+player				JUGADOR: 
+score				PUNTOS: 

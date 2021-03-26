@@ -41,3 +41,10 @@ about_1				Ao continuar estudando as peças de cristal, que emanavam uma forte e
 about_2				Em cada cristal havia uma letra ou algarismo Nisled gravado, e ao combinar cristais iguais, uma grande energia era liberada, contendo uma parcela do conhecimento deixado por aquela civilização. Por isso, ConnecMan decide viajar pelas várias ilhas em busca de mais conhecimento, combinando todos os cristais que encontrar. E aqui entra sua parte nessa história: ajude ConnecMan a decifrar os enigmas do Nisled e aprenda essa inusitada língua você também!
 no_players			Nenhum jogador no Hall da Fama
 credits_info		Design, programação, gráficos e música por:\nVictor David Santos\n\nAgradecimentos especiais:\nJoão Carlos dos Santos\nNathália David Santos\nYuri David Santos\nZuleica Hiromi Alves\n\nEm memória de\nLuiz Carlos dos Santos
+world_1				Ilha de Hard Rock
+world_2				Ilha de Céu Nebuloso
+world_3				Ilha de Lago Gélido
+world_4				Ilha de Vulcanha
+world_5				Ilha dos Quatro Pilares
+player				JOGADOR: 
+score				PONTOS: 
