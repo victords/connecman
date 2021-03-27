@@ -57,3 +57,4 @@ crystal_1			Air
 crystal_2			Water
 crystal_3			Fire
 nisled_alphabet		Nisled alphabet/numbers
+ok					OK

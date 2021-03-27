@@ -9,6 +9,7 @@ class StatusScreen
     @world = ConnecMan.player.last_world
     @level = ConnecMan.player.last_stage
     @stage_num = (@level - 1) % 6 + 1
+    @cur_world = @world
     
     @thumbnails = (0...@world).map { |i| Res.img("main_MapThumbnail#{i}", false, false, '.jpg') }
     @crystals = (0...(@world-1)).map { |i| Res.img("main_crystal#{i}") }
@@ -16,6 +17,32 @@ class StatusScreen
     
     @piece = Res.imgs(:board_pieces, 5, 2)[9]
     @symbols = Res.imgs(:symbols_white, 8, 4)
+    
+    @ok_button = Button.new(325, 553, nil, nil, :main_btn1) {
+      ConnecMan.resume_world
+    }
+    set_arrow_buttons
+  end
+  
+  def set_arrow_buttons
+    @arrow_buttons = []
+    if @cur_world < @world
+      @arrow_buttons << Button.new(384, 317, nil, nil, :main_btnUp) {
+        @cur_world += 1
+        set_arrow_buttons
+      }
+    end
+    if @cur_world > 1
+      @arrow_buttons << Button.new(384, 333, nil, nil, :main_btnDown) {
+        @cur_world -= 1
+        set_arrow_buttons
+      }
+    end
+  end
+  
+  def update
+    @ok_button.update
+    @arrow_buttons.each(&:update)
   end
   
   def draw
@@ -29,12 +56,11 @@ class StatusScreen
     
     @man.draw(40, 50, 0)
     @font.draw_text(ConnecMan.player.name, 80, 54, 0, 1, 1, BLACK)
-    world_name = ConnecMan.text("world_#{@world}")
-    @font.draw_text(ConnecMan.text(:level) + @level.to_s + " (#{world_name} - #{@stage_num})", 80, 84, 0, 1, 1, BLACK)
+    @font.draw_text(ConnecMan.text(:level) + @level.to_s + " (#{ConnecMan.text("world_#{@world}")} - #{@stage_num})", 80, 84, 0, 1, 1, BLACK)
     
     @font.draw_text_rel(ConnecMan.text(:worlds_unlocked), 250, 130, 0, 0.5, 0, 1, 1, BLACK)
-    @thumbnails[@world - 1].draw(50, 160, 0)
-    @font.draw_text_rel("#{@world} - #{world_name}", 210, 320, 0, 0.5, 0, 1, 1, BLACK)
+    @thumbnails[@cur_world - 1].draw(50, 160, 0)
+    @font.draw_text_rel("#{@cur_world} - #{ConnecMan.text("world_#{@cur_world}")}", 210, 324, 0, 0.5, 0, 1, 1, BLACK)
 
     @font.draw_text_rel(ConnecMan.text(:crystals_collected), 650, 130, 0, 0.5, 0, 1, 1, BLACK)
     (0..3).each do |i|
@@ -59,5 +85,10 @@ class StatusScreen
         @shadow.draw(x, y, 0, 1, 1, BLACK)
       end
     end
+    
+    @ok_button.draw
+    @arrow_buttons.each(&:draw)
+    
+    ConnecMan.image_font.draw_text_rel(ConnecMan.text(:ok), @ok_button.x + @ok_button.w / 2, @ok_button.y + @ok_button.h / 2, 0, 0.5, 0.5, 0.6, 0.6, BLACK)
   end
 end

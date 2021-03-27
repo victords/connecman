@@ -193,6 +193,10 @@ class ConnecMan
       @status_screen = StatusScreen.new
       @state = :status
     end
+    
+    def resume_world
+      @state = :world_map
+    end
 
     def update
       if KB.key_pressed?(Gosu::KB_RETURN) && (KB.key_down?(Gosu::KB_LEFT_ALT) || KB.key_down?(Gosu::KB_RIGHT_ALT))
@@ -204,6 +208,8 @@ class ConnecMan
         @main_menu.update
       when :world_map
         @world.update
+      when :status
+        @status_screen.update
       end
     end
 
