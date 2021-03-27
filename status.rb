@@ -19,7 +19,7 @@ class StatusScreen
     @symbols = Res.imgs(:symbols_white, 8, 4)
     
     @ok_button = Button.new(325, 553, nil, nil, :main_btn1) {
-      ConnecMan.resume_world
+      ConnecMan.back
     }
     set_arrow_buttons
   end

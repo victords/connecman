@@ -63,6 +63,10 @@ class World
       end
     end
   end
+  
+  def resume
+    ConnecMan.play_song(Res.song("world#{@num}", false, '.mp3'))
+  end
 
   def update
     if @transition

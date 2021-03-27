@@ -58,3 +58,10 @@ crystal_2			Agua
 crystal_3			Fuego
 nisled_alphabet		Alfabeto/números Nisled
 ok					OK
+menu				MENU
+paused				JUEGO EN PAUSA
+restart				REANUDAR
+resume				CONTINUAR
+confirm				¿ESTÁS SEGURO?
+yes					Sí
+no					No

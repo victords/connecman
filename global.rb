@@ -1,8 +1,9 @@
 require 'fileutils'
+require_relative 'event'
 require_relative 'player'
 require_relative 'world'
 require_relative 'status'
-require_relative 'event'
+require_relative 'stage'
 
 include MiniGL
 
@@ -52,7 +53,7 @@ class ConnecMan
   ]
   
   class << self
-    attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume, :player
+    attr_reader :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume, :player
     attr_accessor :shortcut_keys, :mouse_control, :full_screen, :sound_volume, :language_changed
     
     def initialize(dir)
@@ -116,8 +117,7 @@ class ConnecMan
     end
 
     def show_main_menu
-      @main_menu = Menu.new
-      @state = :main_menu
+      @controller = Menu.new
     end
 
     def text(key)
@@ -180,49 +180,40 @@ class ConnecMan
     end
 
     def start_game
-      @world = World.new(@player.last_world)
-      @state = :world_map
+      @controller = World.new(@player.last_world)
     end
 
     def load_stage(world, index)
+      @prev_controller = @controller
       stage_num = (world - 1) * 6 + index + 1
-      puts "starting level #{stage_num}"
+      @controller = Stage.new(stage_num)
     end
 
     def show_status
-      @status_screen = StatusScreen.new
-      @state = :status
+      @prev_controller = @controller
+      @controller = StatusScreen.new
     end
     
-    def resume_world
-      @state = :world_map
+    def back
+      @controller = @prev_controller
+      @prev_controller = nil
+    end
+    
+    def back_to_world_map
+      back
+      @controller.resume
     end
 
     def update
       if KB.key_pressed?(Gosu::KB_RETURN) && (KB.key_down?(Gosu::KB_LEFT_ALT) || KB.key_down?(Gosu::KB_RIGHT_ALT))
         @full_screen = !@full_screen
       end
-
-      case @state
-      when :main_menu
-        @main_menu.update
-      when :world_map
-        @world.update
-      when :status
-        @status_screen.update
-      end
+      
+      @controller.update
     end
 
     def draw
-      case @state
-      when :main_menu
-        @main_menu.draw
-      when :world_map
-        @world.draw
-      when :status
-        @status_screen.draw
-      end
-
+      @controller.draw
       @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10)
     end
   end

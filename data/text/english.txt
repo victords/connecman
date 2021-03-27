@@ -58,3 +58,10 @@ crystal_2			Water
 crystal_3			Fire
 nisled_alphabet		Nisled alphabet/numbers
 ok					OK
+menu				MENU
+paused				GAME PAUSED
+restart				RESTART
+resume				RESUME
+confirm				ARE YOU SURE?
+yes					Yes
+no					No
