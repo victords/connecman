@@ -48,4 +48,12 @@ world_4				Volcain Island
 world_5				Four Pillars Island
 player				PLAYER: 
 score				SCORE: 
-status				STATUS
+status				Status
+level				Level 
+worlds_unlocked		Worlds unlocked
+crystals_collected	Crystals collected
+crystal_0			Earth
+crystal_1			Air
+crystal_2			Water
+crystal_3			Fire
+nisled_alphabet		Nisled alphabet/numbers

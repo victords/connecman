@@ -48,4 +48,12 @@ world_4				Ilha de Vulcanha
 world_5				Ilha dos Quatro Pilares
 player				JOGADOR: 
 score				PONTOS: 
-status				STATUS
+status				Status
+level				Nível 
+worlds_unlocked		Cenários visitados
+crystals_collected	Cristais coletados
+crystal_0			Terra
+crystal_1			Ar
+crystal_2			Água
+crystal_3			Fogo
+nisled_alphabet		Alfabeto/números Nisled

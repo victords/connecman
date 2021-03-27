@@ -48,4 +48,12 @@ world_4				Isla de Volcaña
 world_5				Isla de los Cuatro Pilares
 player				JUGADOR: 
 score				PUNTOS: 
-status				STATUS
+status				Status
+level				Nivel 
+worlds_unlocked		Escenarios visitados
+crystals_collected	Cristales recogidos
+crystal_0			Tierra
+crystal_1			Aire
+crystal_2			Agua
+crystal_3			Fuego
+nisled_alphabet		Alfabeto/números Nisled

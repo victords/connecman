@@ -1,6 +1,7 @@
 require 'fileutils'
 require_relative 'player'
 require_relative 'world'
+require_relative 'status'
 require_relative 'event'
 
 include MiniGL
@@ -11,10 +12,49 @@ module Const
 end
 
 class ConnecMan
+  SYMBOL_NAMES = [
+    %w(A A),
+    %w(Ba B),
+    %w(Ka K),
+    %w(Da D),
+    %w(E E),
+    %w(Fe F),
+    %w(Ge G),
+    %w(He H),
+    %w(I I),
+    %w(Ji J),
+    %w(Li L),
+    %w(Mi M),
+    %w(Ni N),
+    %w(O O),
+    %w(Po P),
+    %w(Ro R),
+    %w(So S),
+    %w(To T),
+    %w(U U),
+    %w(Vu V),
+    %w(Xu X),
+    %w(Zu Z),
+    %w(Jis 0),
+    %w(As 1),
+    %w(Bas 2),
+    %w(Kas 3),
+    %w(Das 4),
+    %w(Es 5),
+    %w(Fes 6),
+    %w(Ges 7),
+    %w(Hes 8),
+    %w(Is 9)
+  ]
+  
+  SYMBOLS_PER_LEVEL = [
+    [0, 5], [3, 13], [19], [12], [8, 22], [25], [4, 9], [10, 11], [16, 17], [30], [2, 6], [1], [14, 15], [27], [7, 21], [18], [23, 26], [20, 28], [31], [24, 29]
+  ]
+  
   class << self
     attr_reader :state, :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume, :player
     attr_accessor :shortcut_keys, :mouse_control, :full_screen, :sound_volume, :language_changed
-
+    
     def initialize(dir)
       Res.initialize
 
@@ -150,7 +190,8 @@ class ConnecMan
     end
 
     def show_status
-      puts "show status screen"
+      @status_screen = StatusScreen.new
+      @state = :status
     end
 
     def update
@@ -172,6 +213,8 @@ class ConnecMan
         @main_menu.draw
       when :world_map
         @world.draw
+      when :status
+        @status_screen.draw
       end
 
       @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10)
