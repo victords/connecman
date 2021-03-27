@@ -48,3 +48,4 @@ world_4				Isla de Volcaña
 world_5				Isla de los Cuatro Pilares
 player				JUGADOR: 
 score				PUNTOS: 
+status				STATUS

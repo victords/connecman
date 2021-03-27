@@ -35,3 +35,4 @@ class ConnecManWindow < GameWindow
 end
 
 ConnecManWindow.new.show
+ConnecMan.save_options

@@ -140,9 +140,17 @@ class ConnecMan
     end
 
     def start_game
-      stage_num = (@player.last_stage - 1) % 6
-      @world = World.new(@player.last_world, stage_num)
+      @world = World.new(@player.last_world)
       @state = :world_map
+    end
+
+    def load_stage(world, index)
+      stage_num = (world - 1) * 6 + index + 1
+      puts "starting level #{stage_num}"
+    end
+
+    def show_status
+      puts "show status screen"
     end
 
     def update

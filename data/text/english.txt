@@ -48,3 +48,4 @@ world_4				Volcain Island
 world_5				Four Pillars Island
 player				PLAYER: 
 score				SCORE: 
+status				STATUS

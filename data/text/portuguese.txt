@@ -48,3 +48,4 @@ world_4				Ilha de Vulcanha
 world_5				Ilha dos Quatro Pilares
 player				JOGADOR: 
 score				PONTOS: 
+status				STATUS
