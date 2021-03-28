@@ -86,7 +86,6 @@ class Stage
     row = 0; col = 0; i = 0
     el_types = '%kfiyrgbcqwoszn'
     symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
-    @elements = []
     @pieces = {}
     while i < data[3].size
       token = ''
@@ -105,7 +104,8 @@ class Stage
       when 'k'
         amount = token[1..-1].to_i
         amount.times do
-          @elements << Rock.new(row, col, false)
+          @pieces[row] = {} if @pieces[row].nil?
+          @pieces[row][col] = Rock.new(row, col, false)
           col += 1
           if col == @cols
             row += 1
@@ -113,13 +113,15 @@ class Stage
           end
         end
       when 'f'
-        @elements << Rock.new(row, col, true)
+        @pieces[row] = {} if @pieces[row].nil?
+        @pieces[row][col] = Rock.new(row, col, true)
         col += 1
       when 'i', 'y'
-        @elements << IceBlock.new(row, col, token[1].nil? ? nil : token[1].to_i)
+        @pieces[row] = {} if @pieces[row].nil?
+        @pieces[row][col] = IceBlock.new(row, col, token[1].nil? ? nil : token[1].to_i)
         col += 1
       when /[rgbcqwoszn]/
-        @elements << (piece = Piece.new(row, col, el_types.index(token[0]) - 5, symbols.index(token[1])))
+        piece = Piece.new(row, col, el_types.index(token[0]) - 5, symbols.index(token[1]))
         piece.set_movable(:up) if token.include?('!')
         piece.set_movable(:rt) if token.include?('@')
         piece.set_movable(:dn) if token.include?('$')
@@ -138,9 +140,32 @@ class Stage
     @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
     @score = 0
     @timer = 0
+    @effects = []
     @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
+  end
+  
+  def find_path(piece1, piece2)
+    @paths = []
+    find_path_r(piece1.row, piece1.col, piece2)
+    @paths.empty? ? nil : @paths.min { |a, b| a.size <=> b.size }
+  end
+  
+  def find_path_r(row, col, dest, turn_count = -1, dir = -1, path = [], step_count = 0)
+    return if row < 0 || col < 0 || row >= @rows || col >= @cols
+    
+    if dir > -1 && @pieces[row] && @pieces[row][col]
+      @paths << path[0...step_count] if @pieces[row][col] == dest
+      return
+    end
+
+    path[step_count] = [row, col]
+    
+    find_path_r(row - 1, col, dest, dir == 0 ? turn_count : turn_count + 1, 0, path, step_count + 1) if (dir == 0 || turn_count < 2) && dir != 2
+    find_path_r(row, col + 1, dest, dir == 1 ? turn_count : turn_count + 1, 1, path, step_count + 1) if (dir == 1 || turn_count < 2) && dir != 3
+    find_path_r(row + 1, col, dest, dir == 2 ? turn_count : turn_count + 1, 2, path, step_count + 1) if (dir == 2 || turn_count < 2) && dir != 0
+    find_path_r(row, col - 1, dest, dir == 3 ? turn_count : turn_count + 1, 3, path, step_count + 1) if (dir == 3 || turn_count < 2) && dir != 1
   end
   
   def update
@@ -158,9 +183,14 @@ class Stage
       @timer = 0
     end
     
+    @effects.reverse_each do |e|
+      e.update
+      @effects.delete(e) if e.dead
+    end
+    
     row = (Mouse.y - @margin.y) / Const::TILE_SIZE
     col = (Mouse.x - @margin.x) / Const::TILE_SIZE
-    if @pieces[row] && @pieces[row][col]
+    if @pieces[row] && @pieces[row][col] && @pieces[row][col].selectable
       piece = @pieces[row][col]
       if Mouse.button_pressed?(:left)
         if @selected_piece
@@ -168,7 +198,13 @@ class Stage
             @selected_piece.state = :mouse_over
             @selected_piece = nil
           elsif piece.match?(@selected_piece)
-            puts "check pair"
+            path = find_path(piece, @selected_piece)
+            if path
+              @pieces[row][col] = nil
+              @pieces[@selected_piece.row][@selected_piece.col] = nil
+              @selected_piece = nil
+              @effects = path.map { |p| Effect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_ways, 4, 2, 0, [0], 60) }
+            end
           else
             @selected_piece.state = nil
             @selected_piece = piece
@@ -205,9 +241,12 @@ class Stage
   
   def draw
     @bg.draw(0, 0, 0)
-    @elements.each do |el|
-      el.draw(@margin)
+    @pieces.each do |_, row|
+      row.each do |_, cell|
+        cell.draw(@margin) if cell
+      end if row
     end
+    @effects.each(&:draw)
 
     @panel.draw(0, 480, 0)
     @font.draw_text(ConnecMan.text(:score) + @score.to_s, 50, 502, 0, 0.5, 0.5, WHITE)

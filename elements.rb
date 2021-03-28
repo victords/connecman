@@ -1,5 +1,5 @@
 class BoardElement
-  attr_reader :row, :col
+  attr_reader :row, :col, :selectable
   
   def initialize(row, col)
     @row = row
@@ -51,6 +51,7 @@ class Piece < BoardElement
     @sym_img = Res.imgs(type == 9 ? :symbols_black : :symbols_white, 8, 4)[symbol]
     @highlight = Res.img(:main_CursorHighlight)
     @movable = {}
+    @selectable = true
   end
   
   def set_movable(dir)
