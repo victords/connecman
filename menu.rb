@@ -150,7 +150,7 @@ class Menu
     board = case @state
             when :play, :continue, :more
               @board1
-            when :instructions, :options, :about, :hall_of_fame, :credits
+            when :instructions, :about, :hall_of_fame, :credits
               @board2
             end
     if board

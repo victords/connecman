@@ -1,4 +1,5 @@
 require_relative 'elements'
+require_relative 'options'
 
 class Stage
   BLACK = 0xff000000
@@ -6,6 +7,69 @@ class Stage
   OVERLAY_COLOR = 0x64000000
   
   def initialize(num)
+    world = (num - 1) / 6 + 1
+    @bg = Res.img("main_Background#{world}", false, false, '.jpg')
+    @panel = Res.img(:main_Panel)
+    @menu = Res.img("main_Menu#{world}")
+    @font = ConnecMan.image_font
+    
+    @buttons = {
+      main: [
+        Button.new(325, 550, nil, nil, :main_btn1) {
+          @state = :paused
+        }
+      ],
+      dead: [
+        Button.new(245, 550, nil, nil, :main_btn1) {
+          
+        },
+        Button.new(405, 550, nil, nil, :main_btn1) {
+          ConnecMan.back_to_world_map
+        }
+      ],
+      paused: [
+        Button.new(325, 240, nil, nil, :main_btn1) {
+          @state = :main
+        },
+        Button.new(325, 280, nil, nil, :main_btn1) {
+          @confirm_exit = false
+          @state = :confirm
+        },
+        Button.new(325, 320, nil, nil, :main_btn1) {
+          Options.initialize {
+            @state = :paused
+          }
+          @state = :options
+        },
+        Button.new(325, 360, nil, nil, :main_btn1) {
+          @confirm_exit = true
+          @state = :confirm
+        }
+      ],
+      confirm: [
+        Button.new(325, 280, nil, nil, :main_btn1) {
+          if @confirm_exit
+            ConnecMan.back_to_world_map
+          else
+            start(num)
+          end
+        },
+        Button.new(325, 320, nil, nil, :main_btn1) {
+          @state = :paused
+        }
+      ]
+    }
+    @button_texts = {
+      main: [:menu],
+      dead: [:restart, :exit],
+      paused: [:resume, :restart, :options, :exit],
+      confirm: [:yes, :no]
+    }
+    
+    start(num)
+  end
+  
+  def start(num)
     data = File.read("#{Res.prefix}levels/#{'%02d' % num}.cman").split('#')
     general = data[0].split(',')
     @time_left = general[1].to_i
@@ -18,7 +82,7 @@ class Stage
     @items[:waveTransmitter] = item_amounts[0] if item_amounts[0] > 0
     @items[:hourglass] = item_amounts[1] if item_amounts[1] > 0
     @items[:dynamite] = item_amounts[2] if item_amounts[2] > 0
-    
+
     row = 0; col = 0; i = 0
     el_types = '%kfiyrgbcqwoszn'
     symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
@@ -30,7 +94,7 @@ class Stage
         token += data[3][i]
         i += 1
       end until data[3][i].nil? || el_types.include?(data[3][i])
-      
+
       case token[0]
       when '%'
         col += token[1..-1].to_i
@@ -64,73 +128,36 @@ class Stage
         @pieces[row][col] = piece
         col += 1
       end
-      
+
       if col == @cols
         row += 1
         col = 0
       end
     end
-    
+
     @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
-    
-    world = (num - 1) / 6 + 1
-    @bg = Res.img("main_Background#{world}", false, false, '.jpg')
-    @panel = Res.img(:main_Panel)
-    @menu = Res.img("main_Menu#{world}")
-    @font = ConnecMan.image_font
-    
-    @buttons = {
-      main: [
-        Button.new(325, 550, nil, nil, :main_btn1) {
-          @state = :paused
-        }
-      ],
-      dead: [
-        Button.new(245, 550, nil, nil, :main_btn1) {
-          
-        },
-        Button.new(405, 550, nil, nil, :main_btn1) {
-          ConnecMan.back_to_world_map
-        }
-      ],
-      paused: [
-        Button.new(325, 240, nil, nil, :main_btn1) {
-          @state = :main
-        },
-        Button.new(325, 280, nil, nil, :main_btn1) {
-
-        },
-        Button.new(325, 320, nil, nil, :main_btn1) {
-
-        },
-        Button.new(325, 360, nil, nil, :main_btn1) {
-          @state = :confirm
-        }
-      ],
-      confirm: [
-        Button.new(325, 280, nil, nil, :main_btn1) {
-          ConnecMan.back_to_world_map
-        },
-        Button.new(325, 320, nil, nil, :main_btn1) {
-          @state = :paused
-        }
-      ]
-    }
-    @button_texts = {
-      main: [:menu],
-      dead: [:restart, :exit],
-      paused: [:resume, :restart, :options, :exit],
-      confirm: [:yes, :no]
-    }
-    
-    @state = :main
     @score = 0
+    @timer = 0
+    @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
   end
   
   def update
+    if @state == :options
+      Options.update
+      return
+    end
+    
     @buttons[@state].each(&:update)
+    return unless @state == :main
+    
+    @timer += 1
+    if @timer == 60
+      @time_left -= 1
+      @timer = 0
+    end
+    
     row = (Mouse.y - @margin.y) / Const::TILE_SIZE
     col = (Mouse.x - @margin.x) / Const::TILE_SIZE
     if @pieces[row] && @pieces[row][col]
@@ -169,6 +196,13 @@ class Stage
     end
   end
   
+  def draw_overlay
+    G.window.draw_quad(0, 0, OVERLAY_COLOR,
+                       0, Const::SCR_H, OVERLAY_COLOR,
+                       Const::SCR_W, 0, OVERLAY_COLOR,
+                       Const::SCR_W, Const::SCR_H, OVERLAY_COLOR, 0)
+  end
+  
   def draw
     @bg.draw(0, 0, 0)
     @elements.each do |el|
@@ -183,15 +217,16 @@ class Stage
       @font.draw_text(v.to_s, 690, 502 + i * 28, 0, 0.5, 0.5, WHITE)
     end
     
-    if @state == :paused || @state == :confirm
+    if @state == :options
       draw_buttons(:main)
-      G.window.draw_quad(0, 0, OVERLAY_COLOR,
-                         0, Const::SCR_H, OVERLAY_COLOR,
-                         Const::SCR_W, 0, OVERLAY_COLOR,
-                         Const::SCR_W, Const::SCR_H, OVERLAY_COLOR, 0)
+      draw_overlay
+      Options.draw
+    elsif @state == :paused || @state == :confirm
+      draw_buttons(:main)
+      draw_overlay
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
     end
-    draw_buttons(@state)
+    draw_buttons(@state) unless @state == :options
   end
 end

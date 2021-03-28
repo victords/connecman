@@ -127,10 +127,7 @@ class ConnecMan
 
     def play_song(song)
       cur_song = Gosu::Song.current_song
-      if cur_song
-        return if cur_song == song
-        cur_song.stop
-      end
+      cur_song.stop if cur_song
       song.volume = @music_volume * 0.1
       song.play(true)
     end

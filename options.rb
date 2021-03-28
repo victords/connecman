@@ -1,6 +1,8 @@
 class Options
   class << self
     def initialize(&back_action)
+      @panel = Res.img(:main_Board2)
+      
       @controls = []
       (0..5).each do |i|
         @controls << Button.new(620, 195 + i * 37 + (i > 2 ? 35 : 0), nil, nil, :main_btnUp) {
@@ -70,7 +72,11 @@ class Options
     end
 
     def draw
+      y = (Const::SCR_H - @panel.height) / 2
+      @panel.draw((Const::SCR_W - @panel.width) / 2, y, 0)
+      
       font = ConnecMan.default_font
+      font.draw_text_rel(ConnecMan.text(:options), Const::SCR_W / 2, y + 25, 0, 0.5, 0, 1, 1, 0xffffff00)
       font.draw_text(ConnecMan.text(:general), 150, 170, 0, 1, 1, 0xffffff00)
       font.draw_text(ConnecMan.text(:language), 160, 205, 0, 0.75, 0.75, 0xffffffff)
       font.draw_text_rel(ConnecMan.text(:lang_name), 600, 205, 0, 1, 0, 0.75, 0.75, 0xffffffff)
