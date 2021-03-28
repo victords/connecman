@@ -8,7 +8,6 @@ class BoardElement
   
   def draw(margin)
     @img.draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0)
-    @sym_img.draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0) if @sym_img
   end
 end
 
@@ -41,6 +40,7 @@ end
 
 class Piece < BoardElement
   attr_reader :type, :symbol, :movable
+  attr_accessor :state
   
   def initialize(row, col, type, symbol)
     super(row, col)
@@ -49,6 +49,7 @@ class Piece < BoardElement
     
     @img = Res.imgs(:board_pieces, 5, 2)[type]
     @sym_img = Res.imgs(type == 9 ? :symbols_black : :symbols_white, 8, 4)[symbol]
+    @highlight = Res.img(:main_CursorHighlight)
     @movable = {}
   end
   
@@ -57,11 +58,20 @@ class Piece < BoardElement
     @arrows = Res.imgs(:board_arrows, 2, 2) if @arrows.nil?
   end
   
+  def match?(other)
+    @symbol == other.symbol && (@type == other.type || @type <= 5 && other.type <= 5 && (@type - other.type).abs == 3)
+  end
+  
   def draw(margin)
-    super(margin)
-    @arrows[0].draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0) if @movable[:up]
-    @arrows[1].draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0) if @movable[:rt]
-    @arrows[2].draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0) if @movable[:dn]
-    @arrows[3].draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0) if @movable[:lf]
+    x = @col * Const::TILE_SIZE + margin.x
+    y = @row * Const::TILE_SIZE + margin.y
+    @img.draw(x, y, 0)
+    @sym_img.draw(x, y, 0)
+    @arrows[0].draw(x, y, 0) if @movable[:up]
+    @arrows[1].draw(x, y, 0) if @movable[:rt]
+    @arrows[2].draw(x, y, 0) if @movable[:dn]
+    @arrows[3].draw(x, y, 0) if @movable[:lf]
+    @highlight.draw(x, y, 0) if @state == :mouse_over
+    @highlight.draw(x, y, 0, 1, 1, 0xffffff00) if @state == :selected
   end
 end

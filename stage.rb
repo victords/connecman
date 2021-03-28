@@ -23,6 +23,7 @@ class Stage
     el_types = '%kfiyrgbcqwoszn'
     symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
     @elements = []
+    @pieces = {}
     while i < data[3].size
       token = ''
       begin
@@ -59,6 +60,8 @@ class Stage
         piece.set_movable(:rt) if token.include?('@')
         piece.set_movable(:dn) if token.include?('$')
         piece.set_movable(:lf) if token.include?('&')
+        @pieces[row] = {} if @pieces[row].nil?
+        @pieces[row][col] = piece
         col += 1
       end
       
@@ -128,6 +131,35 @@ class Stage
   
   def update
     @buttons[@state].each(&:update)
+    row = (Mouse.y - @margin.y) / Const::TILE_SIZE
+    col = (Mouse.x - @margin.x) / Const::TILE_SIZE
+    if @pieces[row] && @pieces[row][col]
+      piece = @pieces[row][col]
+      if Mouse.button_pressed?(:left)
+        if @selected_piece
+          if piece == @selected_piece
+            @selected_piece.state = :mouse_over
+            @selected_piece = nil
+          elsif piece.match?(@selected_piece)
+            puts "check pair"
+          else
+            @selected_piece.state = nil
+            @selected_piece = piece
+            @selected_piece.state = :selected
+          end
+        else
+          @selected_piece = piece
+          @selected_piece.state = :selected
+        end
+      else
+        @hovered_piece.state = nil if @hovered_piece && @hovered_piece.state != :selected
+        @hovered_piece = piece
+        @hovered_piece.state = :mouse_over if @hovered_piece.state != :selected
+      end
+    else
+      @hovered_piece.state = nil if @hovered_piece && @hovered_piece.state != :selected
+      @hovered_piece = nil
+    end
   end
   
   def draw_buttons(state)
