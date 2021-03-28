@@ -1,4 +1,8 @@
+require_relative 'elements'
+
 class Stage
+  BLACK = 0xff000000
+  WHITE = 0xffffffff
   OVERLAY_COLOR = 0x64000000
   
   def initialize(num)
@@ -10,9 +14,61 @@ class Stage
     bgm = general[4]
     @word = data[1] if general[0] == '1'
     item_amounts = data[2].split(',').map(&:to_i)
+    @items = {}
+    @items[:waveTransmitter] = item_amounts[0] if item_amounts[0] > 0
+    @items[:hourglass] = item_amounts[1] if item_amounts[1] > 0
+    @items[:dynamite] = item_amounts[2] if item_amounts[2] > 0
     
-    puts "time: #{@time_left}, rows: #{@rows}, cols: #{@cols}"
-    puts "WT: #{item_amounts[0]}, HG: #{item_amounts[1]}, DY: #{item_amounts[2]}"
+    row = 0; col = 0; i = 0
+    el_types = '%kfiyrgbcqwoszn'
+    symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
+    @elements = []
+    while i < data[3].size
+      token = ''
+      begin
+        token += data[3][i]
+        i += 1
+      end until data[3][i].nil? || el_types.include?(data[3][i])
+      
+      case token[0]
+      when '%'
+        col += token[1..-1].to_i
+        if col >= @cols
+          row += (col / @cols)
+          col %= @cols
+        end
+      when 'k'
+        amount = token[1..-1].to_i
+        amount.times do
+          @elements << Rock.new(row, col, false)
+          col += 1
+          if col == @cols
+            row += 1
+            col = 0
+          end
+        end
+      when 'f'
+        @elements << Rock.new(row, col, true)
+        col += 1
+      when 'i', 'y'
+        @elements << IceBlock.new(row, col, token[1].nil? ? nil : token[1].to_i)
+        col += 1
+      when /[rgbcqwoszn]/
+        @elements << (piece = Piece.new(row, col, el_types.index(token[0]) - 5, symbols.index(token[1])))
+        piece.set_movable(:up) if token.include?('!')
+        piece.set_movable(:rt) if token.include?('@')
+        piece.set_movable(:dn) if token.include?('$')
+        piece.set_movable(:lf) if token.include?('&')
+        col += 1
+      end
+      
+      if col == @cols
+        row += 1
+        col = 0
+      end
+    end
+    
+    @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
     
     world = (num - 1) / 6 + 1
     @bg = Res.img("main_Background#{world}", false, false, '.jpg')
@@ -65,6 +121,7 @@ class Stage
     }
     
     @state = :main
+    @score = 0
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
   end
@@ -76,13 +133,23 @@ class Stage
   def draw_buttons(state)
     @buttons[state].each_with_index do |b, i|
       b.draw
-      @font.draw_text_rel(ConnecMan.text(@button_texts[state][i]).upcase, b.x + b.w / 2, b.y + b.h / 2, 0, 0.5, 0.5, 0.5, 0.5, 0xff000000)
+      @font.draw_text_rel(ConnecMan.text(@button_texts[state][i]).upcase, b.x + b.w / 2, b.y + b.h / 2, 0, 0.5, 0.5, 0.5, 0.5, BLACK)
     end
   end
   
   def draw
     @bg.draw(0, 0, 0)
+    @elements.each do |el|
+      el.draw(@margin)
+    end
+
     @panel.draw(0, 480, 0)
+    @font.draw_text(ConnecMan.text(:score) + @score.to_s, 50, 502, 0, 0.5, 0.5, WHITE)
+    @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
+    @items.each_with_index do |(k, v), i|
+      Res.img("icon_#{k}").draw(660, 500 + i * 28, 0)
+      @font.draw_text(v.to_s, 690, 502 + i * 28, 0, 0.5, 0.5, WHITE)
+    end
     
     if @state == :paused || @state == :confirm
       draw_buttons(:main)
@@ -91,7 +158,7 @@ class Stage
                          Const::SCR_W, 0, OVERLAY_COLOR,
                          Const::SCR_W, Const::SCR_H, OVERLAY_COLOR, 0)
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
-      @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, 0xff000000)
+      @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
     end
     draw_buttons(@state)
   end

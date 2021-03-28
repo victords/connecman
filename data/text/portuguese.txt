@@ -65,3 +65,4 @@ resume				CONTINUAR
 confirm				TEM CERTEZA?
 yes					Sim
 no					Não
+time				TEMPO: 

@@ -65,3 +65,4 @@ resume				RESUME
 confirm				ARE YOU SURE?
 yes					Yes
 no					No
+time				TIME: 

@@ -10,6 +10,7 @@ include MiniGL
 module Const
   SCR_W = 800
   SCR_H = 600
+  TILE_SIZE = 32
 end
 
 class ConnecMan

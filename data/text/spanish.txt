@@ -65,3 +65,4 @@ resume				CONTINUAR
 confirm				¿ESTÁS SEGURO?
 yes					Sí
 no					No
+time				TIEMPO: 
