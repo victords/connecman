@@ -20,6 +20,8 @@ class Stage
     @panel = Res.img(:main_Panel)
     @menu = Res.img("main_Menu#{world}")
     @font = ConnecMan.image_font
+    # preload as tileable
+    _ = Res.imgs(:fx_ways, 3, 2, false, '.png', false, true)
     
     @buttons = {
       main: [
@@ -249,7 +251,11 @@ class Stage
              else
                1
              end
-      @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_ways, 4, 2, 0, [type], 60)
+      if type == 6
+        @effects << Effect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_wayExtremity, nil, nil, 0, [0], 60)
+      else
+        @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x, p[0] * Const::TILE_SIZE + @margin.y, :fx_ways, 3, 2, 0, [type], 60)
+      end
     end
   end
   
