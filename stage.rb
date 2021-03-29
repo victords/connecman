@@ -149,6 +149,7 @@ class Stage
     @score = 0
     @timer = 0
     @effects = []
+    @score_effects = []
     @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
@@ -226,8 +227,14 @@ class Stage
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, :board_pieces, 5, 2, 0, [piece.type], 60)
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, sym_img, 8, 4, 0, [piece.symbol], 60)
   end
+
+  def add_score_effect(row, col, score, decrease = false)
+    t_s = Const::TILE_SIZE
+    @score_effects << { x: col * t_s + t_s / 2 + @margin.x, y: row * t_s + t_s / 2 + @margin.y, text: score.to_s, color: decrease ? 0xffcc6450 : WHITE, lifetime: 60 }
+  end
   
   def connect(piece)
+    @score += piece.score
     if piece.type >= 3 && piece.type <= 5
       piece.change_type(piece.type - 3)
     else
@@ -237,6 +244,7 @@ class Stage
     check_melt(piece.row, piece.col + 1)
     check_melt(piece.row + 1, piece.col)
     check_melt(piece.row, piece.col - 1)
+    add_score_effect(piece.row, piece.col, piece.score)
   end
   
   def check_melt(row, col)
@@ -260,9 +268,19 @@ class Stage
       @timer = 0
     end
     
+    @pieces.each do |_, row|
+      row.each do |_, cell|
+        cell.update(self) if cell
+      end if row
+    end
+    
     @effects.reverse_each do |e|
       e.update
       @effects.delete(e) if e.dead
+    end
+    @score_effects.reverse_each do |e|
+      e[:lifetime] -= 1
+      @score_effects.delete(e) if e[:lifetime] == 0
     end
     
     row = (Mouse.y - @margin.y) / Const::TILE_SIZE
@@ -324,6 +342,9 @@ class Stage
     @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
     @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
     @effects.each(&:draw)
+    @score_effects.each do |e|
+      @font.draw_text_rel(e[:text], e[:x], e[:y] - 20 + e[:lifetime] / 3, 0, 0.5, 0.5, 0.5, 0.5, e[:color])
+    end
 
     @panel.draw(0, 480, 0)
     @font.draw_text(ConnecMan.text(:score) + @score.to_s, 50, 502, 0, 0.5, 0.5, WHITE)

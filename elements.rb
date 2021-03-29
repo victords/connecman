@@ -6,6 +6,8 @@ class BoardElement
     @col = col
   end
   
+  def update(stage); end
+  
   def draw(margin)
     @img.draw(@col * Const::TILE_SIZE + margin.x, @row * Const::TILE_SIZE + margin.y, 0)
   end
@@ -39,7 +41,7 @@ class IceBlock < BoardElement
 end
 
 class Piece < BoardElement
-  attr_reader :type, :symbol, :movable
+  attr_reader :type, :symbol, :movable, :score
   
   def initialize(row, col, type, symbol)
     super(row, col)
@@ -50,6 +52,19 @@ class Piece < BoardElement
     @sym_img = Res.imgs(type == 9 ? :symbols_black : :symbols_white, 8, 4)[symbol]
     @movable = {}
     @selectable = true
+    @score = case type
+             when 0..5 then 5
+             when 6    then 400
+             when 7    then 200
+             when 8    then 100
+             else           50
+             end
+    @min_score = case type
+                 when 6 then 40
+                 when 7 then 20
+                 when 8 then 10
+                 end
+    @timer = 0
   end
   
   def set_movable(dir)
@@ -64,6 +79,17 @@ class Piece < BoardElement
   def change_type(type)
     @type = type
     @img = Res.imgs(:board_pieces, 5, 2)[type]
+  end
+  
+  def update(stage)
+    return unless @type >= 6 && @type <= 8
+    return unless @score > @min_score
+    @timer += 1
+    if @timer == 600
+      @score -= @min_score / 2
+      stage.add_score_effect(@row, @col, @score, true)
+      @timer = 0
+    end
   end
   
   def draw(margin)
