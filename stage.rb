@@ -27,6 +27,7 @@ class Stage
           @state = :paused
         }
       ],
+      finished: [],
       dead: [
         Button.new(245, 550, nil, nil, :main_btn1) {
           
@@ -95,6 +96,8 @@ class Stage
     el_types = '%kfiyrgbcqwoszn'
     symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
     @pieces = {}
+    pieces_by_type = {}
+    @pairs = {}
     while i < data[3].size
       token = ''
       begin
@@ -112,8 +115,7 @@ class Stage
       when 'k'
         amount = token[1..-1].to_i
         amount.times do
-          @pieces[row] = {} if @pieces[row].nil?
-          @pieces[row][col] = Rock.new(row, col, false)
+          set_piece(Rock.new(row, col, false))
           col += 1
           if col == @cols
             row += 1
@@ -121,12 +123,10 @@ class Stage
           end
         end
       when 'f'
-        @pieces[row] = {} if @pieces[row].nil?
-        @pieces[row][col] = Rock.new(row, col, true)
+        set_piece(Rock.new(row, col, true))
         col += 1
       when 'i', 'y'
-        @pieces[row] = {} if @pieces[row].nil?
-        @pieces[row][col] = IceBlock.new(row, col, token[1].nil? ? nil : token[1].to_i)
+        set_piece(IceBlock.new(row, col, token[1].nil? ? nil : token[1].to_i))
         col += 1
       when /[rgbcqwoszn]/
         piece = Piece.new(row, col, el_types.index(token[0]) - 5, symbols.index(token[1]))
@@ -134,8 +134,17 @@ class Stage
         piece.set_movable(:rt) if token.include?('@')
         piece.set_movable(:dn) if token.include?('$')
         piece.set_movable(:lf) if token.include?('&')
-        @pieces[row] = {} if @pieces[row].nil?
-        @pieces[row][col] = piece
+        set_piece(piece)
+        
+        type = piece.type >= 3 && piece.type <= 5 ? piece.type - 3 : piece.type
+        key = "#{type}|#{piece.symbol}"
+        pieces_by_type[key] = [] if pieces_by_type[key].nil?
+        @pairs[key] = [] if @pairs[key].nil?
+        pieces_by_type[key].each do |p|
+          @pairs[key] << [p, piece]
+        end
+        pieces_by_type[key] << piece
+        
         col += 1
       end
 
@@ -153,6 +162,11 @@ class Stage
     @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
+  end
+  
+  def set_piece(piece)
+    @pieces[piece.row] = {} if @pieces[piece.row].nil?
+    @pieces[piece.row][piece.col] = piece
   end
   
   def find_path(piece1, piece2)
@@ -177,6 +191,23 @@ class Stage
     find_path_r(row, col + 1, dest, dir == 1 ? turn_count : turn_count + 1, 1, path, step_count + 1) if (dir == 1 || turn_count < 2) && dir != 3
     find_path_r(row + 1, col, dest, dir == 2 ? turn_count : turn_count + 1, 2, path, step_count + 1) if (dir == 2 || turn_count < 2) && dir != 0
     find_path_r(row, col - 1, dest, dir == 3 ? turn_count : turn_count + 1, 3, path, step_count + 1) if (dir == 3 || turn_count < 2) && dir != 1
+  end
+  
+  def has_path?(piece1, piece2)
+    find_path_r2(piece1.row, piece1.col, piece2)
+  end
+
+  def find_path_r2(row, col, dest, turn_count = -1, dir = -1)
+    return if row < 0 || col < 0 || row >= @rows || col >= @cols
+
+    if dir > -1 && @pieces[row] && @pieces[row][col]
+      return @pieces[row][col] == dest
+    end
+
+    return true if (dir == 0 || turn_count < 2) && dir != 2 && find_path_r2(row - 1, col, dest, dir == 0 ? turn_count : turn_count + 1, 0)
+    return true if (dir == 1 || turn_count < 2) && dir != 3 && find_path_r2(row, col + 1, dest, dir == 1 ? turn_count : turn_count + 1, 1)
+    return true if (dir == 2 || turn_count < 2) && dir != 0 && find_path_r2(row + 1, col, dest, dir == 2 ? turn_count : turn_count + 1, 2)
+    (dir == 3 || turn_count < 2) && dir != 1 && find_path_r2(row, col - 1, dest, dir == 3 ? turn_count : turn_count + 1, 3)
   end
   
   def add_path_effects(path)
@@ -253,6 +284,26 @@ class Stage
     @pieces[row][col] = nil
   end
   
+  def update_pairs(piece1, piece2)
+    key = "#{piece1.type >= 3 && piece1.type <= 5 ? piece1.type - 3 : piece1.type}|#{piece1.symbol}"
+    @pairs[key].reverse_each do |p|
+      next unless p[0] == piece1 || p[1] == piece1 || p[0] == piece2 || p[1] == piece2
+      @pairs[key].delete(p)
+      @pairs.delete(key) if @pairs[key].empty?
+    end
+    
+    if @pairs.empty?
+      @state = :finished
+    else
+      @pairs.each do |_, ps|
+        ps.each do |p|
+          return if has_path?(p[0], p[1])
+        end
+      end
+      @state = :dead
+    end
+  end
+  
   def update
     if @state == :options
       Options.update
@@ -300,6 +351,7 @@ class Stage
               add_piece_effect(@selected_piece)
               connect(piece)
               connect(@selected_piece)
+              update_pairs(piece, @selected_piece)
               ConnecMan.play_sound('5')
               @selected_piece = @hovered_piece = nil
             else
@@ -363,6 +415,10 @@ class Stage
       draw_overlay
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
+    elsif @state == :finished
+      @font.draw_text_rel('YOU WON', 400, 300, 0, 0.5, 0.5, 1, 1, 0xffffff00)
+    elsif @state == :dead
+      @font.draw_text_rel('DEADLOCKED', 400, 300, 0, 0.5, 0.5, 1, 1, 0xffffff00)
     end
     draw_buttons(@state) unless @state == :options
   end
