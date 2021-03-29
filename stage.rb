@@ -2,9 +2,24 @@ require_relative 'elements'
 require_relative 'options'
 
 class CEffect < Effect
-  def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, lifetime)
+  def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, lifetime, color = nil)
     super(x, y, img, sprite_cols, sprite_rows, interval, indices, lifetime)
     @img_index = indices[0]
+    @color = color || 0xffffffff
+  end
+  
+  def draw
+    @img[@img_index].draw(@x, @y, 0, 1, 1, @color)
+  end
+end
+
+class CSprite < Sprite
+  attr_reader :img_id
+  
+  def initialize(x, y, img, sprite_cols, sprite_rows, index)
+    super(x, y, img, sprite_cols, sprite_rows)
+    @img_id = img
+    @img_index = index
   end
 end
 
@@ -83,12 +98,11 @@ class Stage
   def start(num)
     data = File.read("#{Res.prefix}levels/#{'%02d' % num}.cman").split('#')
     general = data[0].split(',')
-    @time_left = general[1].to_i
-    @rows = general[2].to_i
-    @cols = general[3].to_i
-    bgm = general[4]
-    @word = data[1] if general[0] == '1'
-    item_amounts = data[2].split(',').map(&:to_i)
+    @time_left = general[0].to_i
+    @rows = general[1].to_i
+    @cols = general[2].to_i
+    bgm = general[3]
+    item_amounts = data[1].split(',').map(&:to_i)
     @items = {}
     @items[:waveTransmitter] = item_amounts[0] if item_amounts[0] > 0
     @items[:hourglass] = item_amounts[1] if item_amounts[1] > 0
@@ -100,12 +114,12 @@ class Stage
     @pieces = {}
     pieces_by_type = {}
     @pairs = {}
-    while i < data[3].size
+    while i < data[2].size
       token = ''
       begin
-        token += data[3][i]
+        token += data[2][i]
         i += 1
-      end until data[3][i].nil? || el_types.include?(data[3][i])
+      end until data[2][i].nil? || el_types.include?(data[2][i])
 
       case token[0]
       when '%'
@@ -156,11 +170,14 @@ class Stage
       end
     end
 
+    @word = data[3].split(',').map(&:to_i) if data[3]
+
     @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
     @score = 0
     @timer = 0
     @effects = []
     @score_effects = []
+    @word_effects = []
     @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
@@ -212,7 +229,7 @@ class Stage
     (dir == 3 || turn_count < 2) && dir != 1 && find_path_r2(row, col - 1, dest, dir == 3 ? turn_count : turn_count + 1, 3)
   end
   
-  def add_path_effects(path)
+  def add_path_effects(path, special = false, blue = false)
     path.each_with_index do |p, i|
       pr = path[i - 1]
       nx = path[i + 1]
@@ -251,10 +268,19 @@ class Stage
              else
                1
              end
-      if type == 6
-        @effects << Effect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_wayExtremity, nil, nil, 0, [0], 60)
+      if special
+        if type == 6
+          @word_effects << CSprite.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_specialWayExtremity, nil, nil, 0)
+        else
+          @word_effects << CSprite.new(p[1] * Const::TILE_SIZE + @margin.x, p[0] * Const::TILE_SIZE + @margin.y, :fx_specialWays, 3, 2, type)
+        end
       else
-        @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x, p[0] * Const::TILE_SIZE + @margin.y, :fx_ways, 3, 2, 0, [type], 60)
+        color = blue ? 0xffccffff : WHITE
+        if type == 6
+          @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_wayExtremity, nil, nil, 0, [0], 60, color)
+        else
+          @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x, p[0] * Const::TILE_SIZE + @margin.y, :fx_ways, 3, 2, 0, [type], 60, color)
+        end
       end
     end
   end
@@ -309,6 +335,16 @@ class Stage
       @state = :dead
     end
   end
+
+  def select(piece)
+    @selected_piece = piece
+    @word_pieces = [piece] if piece.type == 9 && piece.symbol == @word[0]
+  end
+  
+  def reset_word
+    @word_pieces = nil
+    @word_effects.clear
+  end
   
   def update
     if @state == :options
@@ -349,6 +385,38 @@ class Stage
         if @selected_piece
           if piece == @selected_piece
             @selected_piece = nil
+            reset_word
+          elsif @word_pieces
+            if piece.type == 9 && piece.symbol == @word[@word_pieces.size]
+              path = find_path(piece, @selected_piece)
+              if path
+                if @word_pieces.size == @word.size - 1
+                  add_path_effects(path, false, true)
+                  @word_effects.each do |eff|
+                    img = eff.img_id == :fx_specialWays ? :fx_ways : :fx_wayExtremity
+                    @effects << CEffect.new(eff.x, eff.y, img, img == :fx_ways ? 3 : nil, img == :fx_ways ? 2 : nil, 0, [eff.img_index], 60, 0xffccffff)
+                  end
+                  @word_effects.clear
+                  @word_pieces << piece
+                  @word_pieces.each do |p|
+                    connect(p)
+                    add_piece_effect(p)
+                  end
+                  ConnecMan.play_sound('5')
+                  @selected_piece = nil
+                else
+                  add_path_effects(path, true)
+                  @selected_piece = piece
+                  @word_pieces << piece
+                end
+              else
+                reset_word
+                select(piece)
+              end
+            else
+              reset_word
+              select(piece)
+            end
           elsif piece.match?(@selected_piece)
             path = find_path(piece, @selected_piece)
             if path
@@ -359,15 +427,15 @@ class Stage
               connect(@selected_piece)
               update_pairs(piece, @selected_piece)
               ConnecMan.play_sound('5')
-              @selected_piece = @hovered_piece = nil
+              @selected_piece = nil
             else
-              @selected_piece = piece
+              select(piece)
             end
           else
-            @selected_piece = piece
+            select(piece)
           end
         else
-          @selected_piece = piece
+          select(piece)
         end
       end
     else
@@ -400,6 +468,7 @@ class Stage
     @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
     @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
     @effects.each(&:draw)
+    @word_effects.each(&:draw)
     @score_effects.each do |e|
       @font.draw_text_rel(e[:text], e[:x], e[:y] - 20 + e[:lifetime] / 3, 0, 0.5, 0.5, 0.5, 0.5, e[:color])
     end
