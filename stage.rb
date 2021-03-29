@@ -1,6 +1,13 @@
 require_relative 'elements'
 require_relative 'options'
 
+class CEffect < Effect
+  def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, lifetime)
+    super(x, y, img, sprite_cols, sprite_rows, interval, indices, lifetime)
+    @img_index = indices[0]
+  end
+end
+
 class Stage
   BLACK = 0xff000000
   WHITE = 0xffffffff
@@ -9,6 +16,7 @@ class Stage
   def initialize(num)
     world = (num - 1) / 6 + 1
     @bg = Res.img("main_Background#{world}", false, false, '.jpg')
+    @highlight = Res.img(:main_CursorHighlight)
     @panel = Res.img(:main_Panel)
     @menu = Res.img("main_Menu#{world}")
     @font = ConnecMan.image_font
@@ -149,7 +157,9 @@ class Stage
   def find_path(piece1, piece2)
     @paths = []
     find_path_r(piece1.row, piece1.col, piece2)
-    @paths.empty? ? nil : @paths.min { |a, b| a.size <=> b.size }
+    return nil if @paths.empty?
+    path = @paths.min { |a, b| a.size <=> b.size }
+    path << [piece2.row, piece2.col]
   end
   
   def find_path_r(row, col, dest, turn_count = -1, dir = -1, path = [], step_count = 0)
@@ -166,6 +176,56 @@ class Stage
     find_path_r(row, col + 1, dest, dir == 1 ? turn_count : turn_count + 1, 1, path, step_count + 1) if (dir == 1 || turn_count < 2) && dir != 3
     find_path_r(row + 1, col, dest, dir == 2 ? turn_count : turn_count + 1, 2, path, step_count + 1) if (dir == 2 || turn_count < 2) && dir != 0
     find_path_r(row, col - 1, dest, dir == 3 ? turn_count : turn_count + 1, 3, path, step_count + 1) if (dir == 3 || turn_count < 2) && dir != 1
+  end
+  
+  def add_path_effects(path)
+    path.each_with_index do |p, i|
+      pr = path[i - 1]
+      nx = path[i + 1]
+      type = if i == 0 || i == path.size - 1
+               6
+             elsif pr[0] == p[0]
+               if nx[0] == p[0]
+                 0
+               elsif nx[0] < p[0]
+                 if pr[1] < p[1]
+                   3
+                 else
+                   4
+                 end
+               elsif pr[1] < p[1]
+                 2
+               else
+                 5
+               end
+             elsif pr[0] < p[0]
+               if nx[0] == p[0]
+                 if nx[1] < p[1]
+                   3
+                 else
+                   4
+                 end
+               else
+                 1
+               end
+             elsif nx[0] == p[0]
+               if nx[1] < p[1]
+                 2
+               else
+                 5
+               end
+             else
+               1
+             end
+      @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_ways, 4, 2, 0, [type], 60)
+      ConnecMan.play_sound('5')
+    end
+  end
+  
+  def add_piece_effect(piece)
+    sym_img = piece.type == 9 ? :symbols_black : :symbols_white
+    @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, :board_pieces, 5, 2, 0, [piece.type], 60)
+    @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, sym_img, 8, 4, 0, [piece.symbol], 60)
   end
   
   def update
@@ -192,35 +252,32 @@ class Stage
     col = (Mouse.x - @margin.x) / Const::TILE_SIZE
     if @pieces[row] && @pieces[row][col] && @pieces[row][col].selectable
       piece = @pieces[row][col]
+      @hovered_piece = piece
       if Mouse.button_pressed?(:left)
         if @selected_piece
           if piece == @selected_piece
-            @selected_piece.state = :mouse_over
             @selected_piece = nil
           elsif piece.match?(@selected_piece)
             path = find_path(piece, @selected_piece)
             if path
+              add_path_effects(path)
+              add_piece_effect(piece)
+              add_piece_effect(@selected_piece)
               @pieces[row][col] = nil
               @pieces[@selected_piece.row][@selected_piece.col] = nil
-              @selected_piece = nil
-              @effects = path.map { |p| Effect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_ways, 4, 2, 0, [0], 60) }
+              @selected_piece = @hovered_piece = nil
+            else
+              @selected_piece = piece
             end
           else
-            @selected_piece.state = nil
             @selected_piece = piece
-            @selected_piece.state = :selected
           end
         else
           @selected_piece = piece
-          @selected_piece.state = :selected
         end
-      else
-        @hovered_piece.state = nil if @hovered_piece && @hovered_piece.state != :selected
-        @hovered_piece = piece
-        @hovered_piece.state = :mouse_over if @hovered_piece.state != :selected
       end
     else
-      @hovered_piece.state = nil if @hovered_piece && @hovered_piece.state != :selected
+      @selected_piece = nil if Mouse.button_pressed?(:left)
       @hovered_piece = nil
     end
   end
@@ -246,6 +303,8 @@ class Stage
         cell.draw(@margin) if cell
       end if row
     end
+    @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
+    @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
     @effects.each(&:draw)
 
     @panel.draw(0, 480, 0)
