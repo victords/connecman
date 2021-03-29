@@ -61,6 +61,11 @@ class Piece < BoardElement
     @symbol == other.symbol && (@type == other.type || @type <= 5 && other.type <= 5 && (@type - other.type).abs == 3)
   end
   
+  def change_type(type)
+    @type = type
+    @img = Res.imgs(:board_pieces, 5, 2)[type]
+  end
+  
   def draw(margin)
     x = @col * Const::TILE_SIZE + margin.x
     y = @row * Const::TILE_SIZE + margin.y

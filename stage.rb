@@ -218,7 +218,6 @@ class Stage
                1
              end
       @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_ways, 4, 2, 0, [type], 60)
-      ConnecMan.play_sound('5')
     end
   end
   
@@ -226,6 +225,24 @@ class Stage
     sym_img = piece.type == 9 ? :symbols_black : :symbols_white
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, :board_pieces, 5, 2, 0, [piece.type], 60)
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, sym_img, 8, 4, 0, [piece.symbol], 60)
+  end
+  
+  def connect(piece)
+    if piece.type >= 3 && piece.type <= 5
+      piece.change_type(piece.type - 3)
+    else
+      @pieces[piece.row][piece.col] = nil
+    end
+    check_melt(piece.row - 1, piece.col)
+    check_melt(piece.row, piece.col + 1)
+    check_melt(piece.row + 1, piece.col)
+    check_melt(piece.row, piece.col - 1)
+  end
+  
+  def check_melt(row, col)
+    return unless @pieces[row] && @pieces[row][col].is_a?(IceBlock)
+    @effects << Effect.new(col * Const::TILE_SIZE + @margin.x, row * Const::TILE_SIZE + @margin.y - 32, :fx_iceMelt, 5, 1, 10)
+    @pieces[row][col] = nil
   end
   
   def update
@@ -263,8 +280,9 @@ class Stage
               add_path_effects(path)
               add_piece_effect(piece)
               add_piece_effect(@selected_piece)
-              @pieces[row][col] = nil
-              @pieces[@selected_piece.row][@selected_piece.col] = nil
+              connect(piece)
+              connect(@selected_piece)
+              ConnecMan.play_sound('5')
               @selected_piece = @hovered_piece = nil
             else
               @selected_piece = piece
