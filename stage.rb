@@ -318,6 +318,11 @@ class Stage
   def check_melt(row, col)
     return unless @pieces[row] && @pieces[row][col].is_a?(IceBlock)
     @effects << Effect.new(col * Const::TILE_SIZE + @margin.x, row * Const::TILE_SIZE + @margin.y - 32, :fx_iceMelt, 5, 1, 10)
+    item_type = @pieces[row][col].item
+    if item_type
+      @items[item_type] ||= 0
+      @items[item_type] += 1
+    end
     @pieces[row][col] = nil
   end
   

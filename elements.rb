@@ -38,6 +38,11 @@ class IceBlock < BoardElement
     else        nil
     end
   end
+  
+  def draw(margin)
+    Res.img("icon_#{item}").draw(col * Const::TILE_SIZE + margin.x + 4, row * Const::TILE_SIZE + margin.y + 4, 0) if @item
+    super(margin)
+  end
 end
 
 class Piece < BoardElement
