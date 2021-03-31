@@ -108,12 +108,15 @@ class Stage
     @items[:hourglass] = item_amounts[1] if item_amounts[1] > 0
     @items[:dynamite] = item_amounts[2] if item_amounts[2] > 0
 
+    @word = data[3].split(',').map(&:to_i) if data[3]
+    
     row = 0; col = 0; i = 0
     el_types = '%kfiyrgbcqwoszn'
     symbols = 'ABKDEFGHIJLMNOPRSTUVXZ1234567890'
     @pieces = {}
     pieces_by_type = {}
     @pairs = {}
+    @white_pieces = []
     while i < data[2].size
       token = ''
       begin
@@ -160,6 +163,7 @@ class Stage
           @pairs[key] << [p, piece]
         end
         pieces_by_type[key] << piece
+        @white_pieces[@word.index(piece.symbol)] = piece if piece.type == 9
         
         col += 1
       end
@@ -169,8 +173,6 @@ class Stage
         col = 0
       end
     end
-
-    @word = data[3].split(',').map(&:to_i) if data[3]
 
     @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
     @score = 0
@@ -275,7 +277,7 @@ class Stage
           @word_effects << CSprite.new(p[1] * Const::TILE_SIZE + @margin.x, p[0] * Const::TILE_SIZE + @margin.y, :fx_specialWays, 3, 2, type)
         end
       else
-        color = blue ? 0xffccffff : WHITE
+        color = blue ? 0xff99ffff : WHITE
         if type == 6
           @effects << CEffect.new(p[1] * Const::TILE_SIZE + @margin.x - 8, p[0] * Const::TILE_SIZE + @margin.y - 8, :fx_wayExtremity, nil, nil, 0, [0], 60, color)
         else
@@ -324,8 +326,20 @@ class Stage
       @pairs.delete(key) if @pairs[key].empty?
     end
     
+    if @word
+      all_paths = true
+      @white_pieces.each_with_index do |p, i|
+        next if i == @white_pieces.size - 1
+        unless has_path?(p, @white_pieces[i + 1])
+          all_paths = false
+          break
+        end
+      end
+      return if all_paths
+    end
+    
     if @pairs.empty?
-      @state = :finished
+      @state = :finished unless @word
     else
       @pairs.each do |_, ps|
         ps.each do |p|
@@ -394,7 +408,7 @@ class Stage
                   add_path_effects(path, false, true)
                   @word_effects.each do |eff|
                     img = eff.img_id == :fx_specialWays ? :fx_ways : :fx_wayExtremity
-                    @effects << CEffect.new(eff.x, eff.y, img, img == :fx_ways ? 3 : nil, img == :fx_ways ? 2 : nil, 0, [eff.img_index], 60, 0xffccffff)
+                    @effects << CEffect.new(eff.x, eff.y, img, img == :fx_ways ? 3 : nil, img == :fx_ways ? 2 : nil, 0, [eff.img_index], 60, 0xff99ffff)
                   end
                   @word_effects.clear
                   @word_pieces << piece
@@ -404,6 +418,7 @@ class Stage
                   end
                   ConnecMan.play_sound('5')
                   @selected_piece = nil
+                  @state = :finished
                 else
                   add_path_effects(path, true)
                   @selected_piece = piece
