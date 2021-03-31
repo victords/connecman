@@ -182,6 +182,7 @@ class Stage
     @effects = []
     @score_effects = []
     @word_effects = []
+    @action = :default
     @state = :main
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
@@ -318,6 +319,7 @@ class Stage
   def check_melt(row, col)
     return unless @pieces[row] && @pieces[row][col].is_a?(IceBlock)
     @effects << Effect.new(col * Const::TILE_SIZE + @margin.x, row * Const::TILE_SIZE + @margin.y - 32, :fx_iceMelt, 5, 1, 10)
+    ConnecMan.play_sound('6')
     item_type = @pieces[row][col].item
     if item_type
       @items[item_type] ||= 0
@@ -402,10 +404,42 @@ class Stage
     
     row = (Mouse.y - @margin.y) / Const::TILE_SIZE
     col = (Mouse.x - @margin.x) / Const::TILE_SIZE
-    if @pieces[row] && @pieces[row][col] && @pieces[row][col].selectable
-      piece = @pieces[row][col]
-      @hovered_piece = piece
-      if Mouse.button_pressed?(:left)
+    piece = row >= 0 && col >= 0 && @pieces[row] && @pieces[row][col]
+    over_selectable_piece = piece && piece.selectable
+    
+    if over_selectable_piece
+      @hovered_piece = @pieces[row][col]
+    else
+      @hovered_piece = nil
+    end
+    
+    return unless Mouse.button_pressed?(:left)
+
+    clicked_item = false
+    @items.each_with_index do |(k, v), i|
+      if Mouse.over?(660, 500 + i * 28, 25, 25)
+        if k == :waveTransmitter
+          @action = :wave_transmitter_source
+        elsif k == :dynamite
+          @action = :dynamite
+        else
+          puts "stop time"
+        end
+        @selected_piece = nil
+        clicked_item = true
+        break
+      end
+    end
+    return if clicked_item
+    
+    if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
+      @pieces[row][col] = nil unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
+      @effects << Effect.new(col * Const::TILE_SIZE + @margin.x - 9, row * Const::TILE_SIZE + @margin.y - 9, :fx_explosion, 2, 2, 7, [0, 1, 2, 3, 2, 1, 0], nil, '9')
+      @items[:dynamite] -= 1
+      @items.delete(:dynamite) if @items[:dynamite] == 0
+      @action = :default
+    elsif over_selectable_piece
+      if @action == :default
         if @selected_piece
           if piece == @selected_piece
             @selected_piece = nil
@@ -462,21 +496,31 @@ class Stage
         else
           select(piece)
         end
+      elsif @action == :wave_transmitter_source
+        if piece.type != 9
+          @selected_piece = piece
+          @action = :wave_transmitter_dest
+        end
+      elsif @action == :wave_transmitter_dest
+        if piece.match?(@selected_piece)
+          connect(piece)
+          connect(@selected_piece)
+          update_pairs(piece, @selected_piece)
+          ConnecMan.play_sound('7')
+          @selected_piece = nil
+          @action = :default
+        end
       end
-    elsif Mouse.button_pressed?(:left)
-      if @selected_piece &&
-         (@selected_piece.movable[:up] && @selected_piece.col == col && @selected_piece.row == row + 1 ||
-          @selected_piece.movable[:rt] && @selected_piece.row == row && @selected_piece.col == col - 1 ||
-          @selected_piece.movable[:dn] && @selected_piece.col == col && @selected_piece.row == row - 1 ||
-          @selected_piece.movable[:lf] && @selected_piece.row == row && @selected_piece.col == col + 1)
-        @pieces[row][col] = @selected_piece
-        @pieces[@selected_piece.row][@selected_piece.col] = nil
-        @selected_piece.move(row, col)
-      else
-        @selected_piece = nil
-      end
+    elsif @selected_piece &&
+          (@selected_piece.movable[:up] && @selected_piece.col == col && @selected_piece.row == row + 1 ||
+           @selected_piece.movable[:rt] && @selected_piece.row == row && @selected_piece.col == col - 1 ||
+           @selected_piece.movable[:dn] && @selected_piece.col == col && @selected_piece.row == row - 1 ||
+           @selected_piece.movable[:lf] && @selected_piece.row == row && @selected_piece.col == col + 1)
+      @pieces[row][col] = @selected_piece
+      @pieces[@selected_piece.row][@selected_piece.col] = nil
+      @selected_piece.move(row, col)
     else
-      @hovered_piece = nil
+      @selected_piece = nil
     end
   end
   
@@ -532,5 +576,20 @@ class Stage
       @font.draw_text_rel('DEADLOCKED', 400, 300, 0, 0.5, 0.5, 1, 1, 0xffffff00)
     end
     draw_buttons(@state) unless @state == :options
+
+    cursor = if @state == :main
+               if @action == :wave_transmitter_source
+                 Res.img(:cursor_WaveTransmitter)
+               elsif @action == :wave_transmitter_dest
+                 Res.img(:cursor_WaveReceptor)
+               elsif @action == :dynamite
+                 Res.img(:cursor_Dynamite)
+               else
+                 Res.img(:cursor_Default)
+               end
+             else
+               Res.img(:cursor_Default)
+             end
+    cursor.draw(Mouse.x - cursor.width / 2, Mouse.y, 10) unless @controller.is_a?(Stage)
   end
 end

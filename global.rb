@@ -212,7 +212,7 @@ class ConnecMan
 
     def draw
       @controller.draw
-      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10)
+      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @controller.is_a?(Stage)
     end
   end
 end
