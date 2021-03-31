@@ -81,6 +81,11 @@ class Piece < BoardElement
     @img = Res.imgs(:board_pieces, 5, 2)[type]
   end
   
+  def move(row, col)
+    @row = row
+    @col = col
+  end
+  
   def update(stage)
     return unless @type >= 6 && @type <= 8
     return unless @score > @min_score

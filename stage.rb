@@ -117,6 +117,7 @@ class Stage
     pieces_by_type = {}
     @pairs = {}
     @white_pieces = []
+    @movable_piece_count = 0
     while i < data[2].size
       token = ''
       begin
@@ -164,6 +165,7 @@ class Stage
         end
         pieces_by_type[key] << piece
         @white_pieces[@word.index(piece.symbol)] = piece if piece.type == 9
+        @movable_piece_count += 1 if piece.movable.any?
         
         col += 1
       end
@@ -300,6 +302,7 @@ class Stage
   
   def connect(piece)
     @score += piece.score
+    @movable_piece_count -= 1 if piece.movable.any?
     if piece.type >= 3 && piece.type <= 5
       piece.change_type(piece.type - 3)
     else
@@ -325,6 +328,8 @@ class Stage
       @pairs[key].delete(p)
       @pairs.delete(key) if @pairs[key].empty?
     end
+    
+    return if @movable_piece_count > 0
     
     if @word
       all_paths = true
@@ -453,8 +458,19 @@ class Stage
           select(piece)
         end
       end
+    elsif Mouse.button_pressed?(:left)
+      if @selected_piece &&
+         (@selected_piece.movable[:up] && @selected_piece.col == col && @selected_piece.row == row + 1 ||
+          @selected_piece.movable[:rt] && @selected_piece.row == row && @selected_piece.col == col - 1 ||
+          @selected_piece.movable[:dn] && @selected_piece.col == col && @selected_piece.row == row - 1 ||
+          @selected_piece.movable[:lf] && @selected_piece.row == row && @selected_piece.col == col + 1)
+        @pieces[row][col] = @selected_piece
+        @pieces[@selected_piece.row][@selected_piece.col] = nil
+        @selected_piece.move(row, col)
+      else
+        @selected_piece = nil
+      end
     else
-      @selected_piece = nil if Mouse.button_pressed?(:left)
       @hovered_piece = nil
     end
   end
