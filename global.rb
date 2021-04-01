@@ -11,6 +11,7 @@ module Const
   SCR_W = 800
   SCR_H = 600
   TILE_SIZE = 32
+  STOP_TIME_DURATION = 1800
 end
 
 class ConnecMan

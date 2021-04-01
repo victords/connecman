@@ -13,6 +13,56 @@ class CEffect < Effect
   end
 end
 
+class HourglassEffect < Effect
+  def initialize
+    super(Const::SCR_W / 2, 240, :fx_hourglass, nil, nil, 0, nil, 60, '8')
+    @angle = 0
+  end
+  
+  def update
+    super
+    @angle += 1
+  end
+  
+  def draw
+    @img[0].draw_rot(@x, @y, 0, @angle, 0.5, 0.5, 1, 1, ((255 * (1 - @angle.to_f / 60)).floor << 24) | 0xffffff)
+  end
+end
+
+class TimerEffect
+  attr_reader :dead
+  
+  def initialize
+    @x = 250
+    @y = 500
+    @bg = Res.img(:fx_timerBg)
+    @fill = Res.img(:fx_timerFill)
+    @icon = Res.img(:icon_hourglass)
+    @lifetime = Const::STOP_TIME_DURATION
+  end
+  
+  def update
+    @lifetime -= 1
+    @dead = true if @lifetime == 0
+  end
+  
+  def draw
+    @bg.draw(@x, @y, 0)
+    w = @lifetime / 6
+    if w >= 2
+      if w <= 10
+        @fill.subimage(0, 0, w / 2, @fill.height).draw(@x, @y, 0)
+        @fill.subimage(@fill.width - w + w / 2, 0, w - (w / 2), @fill.height).draw(@x + w / 2, @y, 0)
+      else
+        @fill.subimage(0, 0, 5, @fill.height).draw(@x, @y, 0)
+        @fill.subimage(5, 0, 290, @fill.height).draw(@x + 5, @y, 0, (w - 10).to_f / 290, 1)
+        @fill.subimage(@fill.width - 5, 0, 5, @fill.height).draw(@x + w - 5, @y, 0)
+      end
+    end
+    @icon.draw(@x, @y, 0)
+  end
+end
+
 class CSprite < Sprite
   attr_reader :img_id
   
@@ -295,6 +345,11 @@ class Stage
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, :board_pieces, 5, 2, 0, [piece.type], 60)
     @effects << CEffect.new(piece.col * Const::TILE_SIZE + @margin.x, piece.row * Const::TILE_SIZE + @margin.y, sym_img, 8, 4, 0, [piece.symbol], 60)
   end
+  
+  def add_wave_effects(piece1, piece2)
+    @effects << Effect.new(piece1.col * Const::TILE_SIZE + @margin.x - 17, piece1.row * Const::TILE_SIZE + @margin.y - 42, :fx_waves, 5, 1, 7, nil, 60, '7')
+    @effects << Effect.new(piece2.col * Const::TILE_SIZE + @margin.x - 1, piece2.row * Const::TILE_SIZE + @margin.y - 12, :fx_waveRec, 2, 1, 7, nil, 60)
+  end
 
   def add_score_effect(row, col, score, decrease = false)
     t_s = Const::TILE_SIZE
@@ -329,14 +384,16 @@ class Stage
   end
   
   def update_pairs(piece1, piece2)
-    key = "#{piece1.type >= 3 && piece1.type <= 5 ? piece1.type - 3 : piece1.type}|#{piece1.symbol}"
-    @pairs[key].reverse_each do |p|
-      next unless p[0] == piece1 || p[1] == piece1 || p[0] == piece2 || p[1] == piece2
-      @pairs[key].delete(p)
-      @pairs.delete(key) if @pairs[key].empty?
+    if piece1 && piece2
+      key = "#{piece1.type >= 3 && piece1.type <= 5 ? piece1.type - 3 : piece1.type}|#{piece1.symbol}"
+      @pairs[key].reverse_each do |p|
+        next unless p[0] == piece1 || p[1] == piece1 || p[0] == piece2 || p[1] == piece2
+        @pairs[key].delete(p)
+        @pairs.delete(key) if @pairs[key].empty?
+      end
     end
     
-    return if @movable_piece_count > 0
+    return if @movable_piece_count > 0 || @items[:waveTransmitter] || @items[:dynamite]
     
     if @word
       all_paths = true
@@ -372,6 +429,11 @@ class Stage
     @word_effects.clear
   end
   
+  def consume_item(type)
+    @items[type] -= 1
+    @items.delete(type) if @items[type] == 0
+  end
+  
   def update
     if @state == :options
       Options.update
@@ -381,16 +443,23 @@ class Stage
     @buttons[@state].each(&:update)
     return unless @state == :main
     
-    @timer += 1
-    if @timer == 60
-      @time_left -= 1
-      @timer = 0
-    end
-    
-    @pieces.each do |_, row|
-      row.each do |_, cell|
-        cell.update(self) if cell
-      end if row
+    if @time_stopped
+      @time_stopped -= 1
+      if @time_stopped == 0
+        @time_stopped = nil
+      end
+    else
+      @timer += 1
+      if @timer == 60
+        @time_left -= 1
+        @timer = 0
+      end
+
+      @pieces.each do |_, row|
+        row.each do |_, cell|
+          cell.update(self) if cell
+        end if row
+      end
     end
     
     @effects.reverse_each do |e|
@@ -423,7 +492,10 @@ class Stage
         elsif k == :dynamite
           @action = :dynamite
         else
-          puts "stop time"
+          @time_stopped = Const::STOP_TIME_DURATION
+          @effects << HourglassEffect.new
+          @effects << TimerEffect.new
+          consume_item(:hourglass)
         end
         @selected_piece = nil
         clicked_item = true
@@ -435,8 +507,8 @@ class Stage
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
       @pieces[row][col] = nil unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
       @effects << Effect.new(col * Const::TILE_SIZE + @margin.x - 9, row * Const::TILE_SIZE + @margin.y - 9, :fx_explosion, 2, 2, 7, [0, 1, 2, 3, 2, 1, 0], nil, '9')
-      @items[:dynamite] -= 1
-      @items.delete(:dynamite) if @items[:dynamite] == 0
+      consume_item(:dynamite)
+      update_pairs(nil, nil)
       @action = :default
     elsif over_selectable_piece
       if @action == :default
@@ -503,10 +575,13 @@ class Stage
         end
       elsif @action == :wave_transmitter_dest
         if piece.match?(@selected_piece)
+          add_piece_effect(piece)
+          add_piece_effect(@selected_piece)
+          add_wave_effects(@selected_piece, piece)
           connect(piece)
           connect(@selected_piece)
+          consume_item(:waveTransmitter)
           update_pairs(piece, @selected_piece)
-          ConnecMan.play_sound('7')
           @selected_piece = nil
           @action = :default
         end
@@ -547,13 +622,13 @@ class Stage
     end
     @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
     @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
-    @effects.each(&:draw)
     @word_effects.each(&:draw)
     @score_effects.each do |e|
       @font.draw_text_rel(e[:text], e[:x], e[:y] - 20 + e[:lifetime] / 3, 0, 0.5, 0.5, 0.5, 0.5, e[:color])
     end
 
     @panel.draw(0, 480, 0)
+    @effects.each(&:draw)
     @font.draw_text(ConnecMan.text(:score) + @score.to_s, 50, 502, 0, 0.5, 0.5, WHITE)
     @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
     @items.each_with_index do |(k, v), i|
