@@ -422,7 +422,11 @@ class Stage
           return if has_path?(p[0], p[1])
         end
       end
-      @state = :dead unless has_movable_or_item
+      unless has_movable_or_item
+        Gosu::Song.current_song.stop
+        ConnecMan.play_sound('11')
+        @state = :dead
+      end
     end
   end
 
@@ -442,6 +446,8 @@ class Stage
   end
   
   def finish
+    Gosu::Song.current_song.stop
+    ConnecMan.play_sound('10')
     @state = :finished
     @timer = 0
   end
@@ -463,6 +469,7 @@ class Stage
           end
         elsif @num == ConnecMan.player.last_stage
           if @num % 6 == 0
+            ConnecMan.play_sound('12')
             @state = :finish_message
             @timer = 0
           else
