@@ -422,11 +422,7 @@ class Stage
           return if has_path?(p[0], p[1])
         end
       end
-      unless has_movable_or_item
-        Gosu::Song.current_song.stop
-        ConnecMan.play_sound('11')
-        @state = :dead
-      end
+      die unless has_movable_or_item
     end
   end
 
@@ -443,6 +439,12 @@ class Stage
   def consume_item(type)
     @items[type] -= 1
     @items.delete(type) if @items[type] == 0
+  end
+  
+  def die
+    Gosu::Song.current_song.stop
+    ConnecMan.play_sound('11')
+    @state = :dead
   end
   
   def finish
@@ -498,6 +500,10 @@ class Stage
       @timer += 1
       if @timer == 60
         @time_left -= 1
+        if @time_left == 0
+          die
+          return
+        end
         @timer = 0
       end
 
@@ -692,9 +698,10 @@ class Stage
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
     elsif @state == :dead
-      @font.draw_text_rel(ConnecMan.text(:no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
+      @font.draw_text_rel(ConnecMan.text(@time_left == 0 ? :time_up : :no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
     elsif @state == :finished
       @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 240, 0, 0.5, 0.5, 1, 1, 0xffffff00)
+      
     elsif @state == :finish_message
       num = (@num - 1) / 6
       board_y = (480 - @board.height) / 2

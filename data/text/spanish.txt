@@ -66,6 +66,7 @@ confirm				¿ESTÁS SEGURO?
 yes					Sí
 no					No
 time				TIEMPO: 
+time_up				¡TIEMPO AGOTADO!
 no_moves_left		¡NINGÚN MOVIMIENTO POSIBLE!
 level_completed		¡NIVEL COMPLETADO!
 world_completed		 - ¡Etapa Completa!
