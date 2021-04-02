@@ -76,6 +76,8 @@ end
 class Stage
   BLACK = 0xff000000
   WHITE = 0xffffffff
+  LIGHT_BLUE = 0xff99ccff
+  YELLOW = 0xffffff00
   OVERLAY_COLOR = 0x64000000
   NISLED_WORDS = %w(FOND SEMI VEIN KORE)
   
@@ -233,7 +235,9 @@ class Stage
     end
 
     @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
-    @score = 0
+    @score = {
+      default: 0
+    }
     @timer = 0
     @effects = []
     @score_effects = []
@@ -363,7 +367,7 @@ class Stage
   end
   
   def connect(piece)
-    @score += piece.score
+    @score[:default] += piece.score
     @movable_piece_count -= 1 if piece.movable.any?
     if piece.type >= 3 && piece.type <= 5
       piece.change_type(piece.type - 3)
@@ -452,6 +456,23 @@ class Stage
     ConnecMan.play_sound('10')
     @state = :finished
     @timer = 0
+    
+    @score[:time] = @time_left * 5
+    @score[:items] = @items.values.sum * 200
+    @score[:total] = @score[:default] + @score[:time] + @score[:items]
+    
+    player_score = ConnecMan.player.scores[@num - 1]
+    if !player_score || @score[:total] > player_score
+      ConnecMan.player.scores[@num - 1] = @score[:total]
+      @new_high_score = true
+    end
+    
+    if @num == ConnecMan.player.last_stage && !ConnecMan::SYMBOLS_PER_LEVEL[@num - 1].empty?
+      ConnecMan::SYMBOLS_PER_LEVEL[@num - 1].each do |s|
+        ConnecMan.player.learned_symbols[s] = true
+      end
+      @new_letters = true
+    end
   end
   
   def update
@@ -681,7 +702,7 @@ class Stage
 
     @panel.draw(0, 480, 0)
     @effects.each(&:draw)
-    @font.draw_text(ConnecMan.text(:score) + @score.to_s, 50, 502, 0, 0.5, 0.5, WHITE)
+    @font.draw_text(ConnecMan.text(:score) + @score[:default].to_s, 50, 502, 0, 0.5, 0.5, WHITE)
     @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
     @items.each_with_index do |(k, v), i|
       Res.img("icon_#{k}").draw(660, 500 + i * 28, 0)
@@ -700,8 +721,12 @@ class Stage
     elsif @state == :dead
       @font.draw_text_rel(ConnecMan.text(@time_left == 0 ? :time_up : :no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
     elsif @state == :finished
-      @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 240, 0, 0.5, 0.5, 1, 1, 0xffffff00)
-      
+      @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 160, 0, 0.5, 0, 1, 1, LIGHT_BLUE)
+      @font.draw_text_rel(ConnecMan.text(:time_bonus) + @score[:time].to_s, 400, 210, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
+      @font.draw_text_rel(ConnecMan.text(:items_bonus) + @score[:items].to_s, 400, 235, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
+      @font.draw_text_rel(ConnecMan.text(:total) + @score[:total].to_s, 400, 260, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
+      @font.draw_text_rel(ConnecMan.text(:new_high_score), 400, 285, 0, 0.5, 0, 0.5, 0.5, YELLOW) if @new_high_score
+      @font.draw_text_rel(ConnecMan.text(:new_letters), 400, 310, 0, 0.5, 0, 0.5, 0.5, YELLOW) if @new_letters
     elsif @state == :finish_message
       num = (@num - 1) / 6
       board_y = (480 - @board.height) / 2

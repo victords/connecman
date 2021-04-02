@@ -1,5 +1,39 @@
 class StatusScreen
   BLACK = 0xff000000
+  SYMBOL_NAMES = [
+    %w(A A),
+    %w(Ba B),
+    %w(Ka K),
+    %w(Da D),
+    %w(E E),
+    %w(Fe F),
+    %w(Ge G),
+    %w(He H),
+    %w(I I),
+    %w(Ji J),
+    %w(Li L),
+    %w(Mi M),
+    %w(Ni N),
+    %w(O O),
+    %w(Po P),
+    %w(Ro R),
+    %w(So S),
+    %w(To T),
+    %w(U U),
+    %w(Vu V),
+    %w(Xu X),
+    %w(Zu Z),
+    %w(Jis 0),
+    %w(As 1),
+    %w(Bas 2),
+    %w(Kas 3),
+    %w(Das 4),
+    %w(Es 5),
+    %w(Fes 6),
+    %w(Ges 7),
+    %w(Hes 8),
+    %w(Is 9)
+  ]
   
   def initialize
     @font = ConnecMan.default_font
@@ -73,7 +107,7 @@ class StatusScreen
     end
 
     @font.draw_text_rel(ConnecMan.text(:nisled_alphabet), Const::SCR_W / 2, 375, 0, 0.5, 0, 1, 1, BLACK)
-    ConnecMan::SYMBOL_NAMES.each_with_index do |s, i|
+    SYMBOL_NAMES.each_with_index do |s, i|
       x = 45 + (i % 11) * 65
       y = 415 + (i / 11) * 45
       if ConnecMan.player.learned_symbols[i]
