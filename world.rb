@@ -13,7 +13,7 @@ class World
     @num = num
     @bg = Res.img("map_Map#{@num}")
 
-    @cur_spot = ConnecMan.player.last_world > num ? 5 : (ConnecMan.player.last_stage - 1) % 6
+    @last_spot = @cur_spot = ConnecMan.player.last_world > num ? 5 : (ConnecMan.player.last_stage - 1) % 6
 
     spots = case @num
             when 1 then [[200, 370], [282, 490], [515, 407], [340, 380], [477, 319], [515, 232]]
@@ -22,7 +22,7 @@ class World
             when 4 then [[206, 327], [220, 447], [454, 521], [616, 403], [604, 277], [405, 266]]
             else        [[347, 329]]
             end
-    @spots = spots[0..@cur_spot].map { |s| Vector.new(s[0], s[1]) }
+    @spots = spots.map { |s| Vector.new(s[0], s[1]) }
     @spot_buttons = []
     @spots.each_with_index do |s, i|
       @spot_buttons << Button.new(s.x - 16, s.y - 12, nil, nil, :map_Spot) {
@@ -67,6 +67,13 @@ class World
   def resume
     ConnecMan.play_song(Res.song("world#{@num}", false, '.mp3'))
   end
+  
+  def advance_level
+    @cur_spot += 1
+    @last_spot += 1
+    @man.x = @spots[@cur_spot].x
+    @man.y = @spots[@cur_spot].y
+  end
 
   def update
     if @transition
@@ -82,7 +89,7 @@ class World
       end
     else
       @spot_buttons.each_with_index do |s, i|
-        s.update if i != @cur_spot
+        s.update if i != @cur_spot && i <= @last_spot
       end
       @buttons.each(&:update)
       @arrow_buttons.each(&:update)
@@ -109,8 +116,8 @@ class World
     color = (@alpha << 24) | 0xffffff
     @bg.draw(0, 0, 0, 1, 1, color)
 
-    @spot_buttons.each do |b|
-      b.draw(@alpha)
+    @spot_buttons.each_with_index do |b, i|
+      b.draw(@alpha) if i <= @last_spot
     end
     @buttons.each_with_index do |b, i|
       b.draw
@@ -122,7 +129,7 @@ class World
     end
 
     @spots.each_with_index do |s, i|
-      ConnecMan.image_font.draw_text_rel((i + 1).to_s, s.x, s.y - 10, 0, 0.5, 0, 0.3, 0.3, @alpha << 24)
+      ConnecMan.image_font.draw_text_rel((i + 1).to_s, s.x, s.y - 10, 0, 0.5, 0, 0.3, 0.3, @alpha << 24) if i <= @last_spot
     end
     @man.draw(nil, 1, 1, @alpha)
     score = ConnecMan.player.scores[(@num - 1) * 6 + @cur_spot]

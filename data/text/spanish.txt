@@ -66,3 +66,9 @@ confirm				¿ESTÁS SEGURO?
 yes					Sí
 no					No
 time				TIEMPO: 
+no_moves_left		¡NINGÚN MOVIMIENTO POSIBLE!
+level_completed		¡NIVEL COMPLETADO!
+world_completed		 - ¡Etapa Completa!
+bonus_message		Has descubierto una nueva palabra en Nisled: '{}', que significa '{}'. Las piezas blancas se han fusionado en un grande cristal, ¡el cristal de {}!
+click_to_continue	(Haga clic para continuar)
+press_to_continue	(Pulse la barra espaciadora para continuar)

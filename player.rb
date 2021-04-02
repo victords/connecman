@@ -1,5 +1,6 @@
 class Player
-  attr_reader :name, :completed, :last_stage, :last_world, :scores, :learned_symbols
+  attr_reader :name, :completed, :scores, :learned_symbols
+  attr_accessor :last_stage, :last_world
 
   def initialize(name = '-', completed = false, last_stage = 1, scores = [])
     @name = name

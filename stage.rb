@@ -77,12 +77,17 @@ class Stage
   BLACK = 0xff000000
   WHITE = 0xffffffff
   OVERLAY_COLOR = 0x64000000
+  NISLED_WORDS = %w(FOND SEMI VEIN KORE)
+  
+  attr_reader :num
   
   def initialize(num)
+    @num = num
     world = (num - 1) / 6 + 1
     @bg = Res.img("main_Background#{world}", false, false, '.jpg')
     @highlight = Res.img(:main_CursorHighlight)
     @panel = Res.img(:main_Panel)
+    @board = Res.img(:main_Board2)
     @menu = Res.img("main_Menu#{world}")
     @font = ConnecMan.image_font
     # preload as tileable
@@ -92,15 +97,6 @@ class Stage
       main: [
         Button.new(325, 550, nil, nil, :main_btn1) {
           @state = :paused
-        }
-      ],
-      finished: [],
-      dead: [
-        Button.new(245, 550, nil, nil, :main_btn1) {
-          
-        },
-        Button.new(405, 550, nil, nil, :main_btn1) {
-          ConnecMan.back_to_world_map
         }
       ],
       paused: [
@@ -133,7 +129,17 @@ class Stage
         Button.new(325, 320, nil, nil, :main_btn1) {
           @state = :paused
         }
-      ]
+      ],
+      dead: [
+        Button.new(245, 550, nil, nil, :main_btn1) {
+          start(num)
+        },
+        Button.new(405, 550, nil, nil, :main_btn1) {
+          ConnecMan.back_to_world_map
+        }
+      ],
+      finished: [],
+      finish_message: []
     }
     @button_texts = {
       main: [:menu],
@@ -393,7 +399,8 @@ class Stage
       end
     end
     
-    return if @movable_piece_count > 0 || @items[:waveTransmitter] || @items[:dynamite]
+    has_movable_or_item = @movable_piece_count > 0 || @items[:waveTransmitter] || @items[:dynamite]
+    return if !@pairs.empty? && has_movable_or_item
     
     if @word
       all_paths = true
@@ -408,14 +415,14 @@ class Stage
     end
     
     if @pairs.empty?
-      @state = :finished unless @word
+      finish unless @word
     else
       @pairs.each do |_, ps|
         ps.each do |p|
           return if has_path?(p[0], p[1])
         end
       end
-      @state = :dead
+      @state = :dead unless has_movable_or_item
     end
   end
 
@@ -434,10 +441,42 @@ class Stage
     @items.delete(type) if @items[type] == 0
   end
   
+  def finish
+    @state = :finished
+    @timer = 0
+  end
+  
   def update
     if @state == :options
       Options.update
       return
+    end
+    
+    if @state == :finished
+      @timer += 1 if @timer < 120
+      if @timer == 120 && Mouse.button_pressed?(:left)
+        if @num == Const::LAST_STAGE
+          if ConnecMan.player.completed
+            ConnecMan.back_to_world_map
+          else
+            ConnecMan.show_finish
+          end
+        elsif @num == ConnecMan.player.last_stage
+          if @num % 6 == 0
+            @state = :finish_message
+            @timer = 0
+          else
+            ConnecMan.next_level
+          end
+        else
+          ConnecMan.back_to_world_map
+        end
+      end
+    elsif @state == :finish_message
+      @timer += 1 if @timer < 120
+      if @timer == 120 && Mouse.button_pressed?(:left)
+        ConnecMan.next_world
+      end
     end
     
     @buttons[@state].each(&:update)
@@ -534,7 +573,7 @@ class Stage
                   end
                   ConnecMan.play_sound('5')
                   @selected_piece = nil
-                  @state = :finished
+                  finish
                 else
                   add_path_effects(path, true)
                   @selected_piece = piece
@@ -645,10 +684,21 @@ class Stage
       draw_overlay
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
-    elsif @state == :finished
-      @font.draw_text_rel('YOU WON', 400, 300, 0, 0.5, 0.5, 1, 1, 0xffffff00)
     elsif @state == :dead
-      @font.draw_text_rel('DEADLOCKED', 400, 300, 0, 0.5, 0.5, 1, 1, 0xffffff00)
+      @font.draw_text_rel(ConnecMan.text(:no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
+    elsif @state == :finished
+      @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 240, 0, 0.5, 0.5, 1, 1, 0xffffff00)
+    elsif @state == :finish_message
+      num = (@num - 1) / 6
+      board_y = (480 - @board.height) / 2
+      draw_overlay
+      @board.draw((Const::SCR_W - @board.width) / 2, (480 - @board.height) / 2, 0)
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text("world_#{num + 1}") + ConnecMan.text(:world_completed), Const::SCR_W / 2, board_y + 20, 0, 0.5, 0, 1, 1, WHITE)
+      msg = ConnecMan.text(:bonus_message).sub('{}', NISLED_WORDS[num]).gsub('{}', ConnecMan.text("crystal_#{num}"))
+      ConnecMan.text_helper.write_breaking(msg, 120, 120, 560, :justified, 0xffffff, 255, 0, 0.75, 0.75)
+      img = Res.img("messages_bonus_#{num}")
+      img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2, 0)
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 120
     end
     draw_buttons(@state) unless @state == :options
 

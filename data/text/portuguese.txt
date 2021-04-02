@@ -66,3 +66,9 @@ confirm				TEM CERTEZA?
 yes					Sim
 no					Não
 time				TEMPO: 
+no_moves_left		NENHUM MOVIMENTO POSSÍVEL!
+level_completed		NÍVEL COMPLETO!
+world_completed		 - Cenário Completo!
+bonus_message		Você descobriu uma nova palavra em Nisled: '{}', que significa '{}'.\nAs peças brancas se fundiram em um grande cristal, o cristal de {}!
+click_to_continue	(Clique para continuar)
+press_to_continue	(Aperte a barra de espaço para continuar)

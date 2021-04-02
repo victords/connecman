@@ -12,6 +12,7 @@ module Const
   SCR_H = 600
   TILE_SIZE = 32
   STOP_TIME_DURATION = 1800
+  LAST_STAGE = 25
 end
 
 class ConnecMan
@@ -91,7 +92,7 @@ class ConnecMan
       end
 
       @default_font = Res.font(:corbel, 24)
-      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZ', 31, 41, 30)
+      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZÚ', 31, 41, 30)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
       @cursor = Res.img(:cursor_Default, true)
 
@@ -201,6 +202,22 @@ class ConnecMan
     def back_to_world_map
       back
       @controller.resume
+    end
+    
+    def next_level
+      @player.last_stage += 1
+      @prev_controller.advance_level
+      @controller = Stage.new(@controller.num + 1)
+    end
+    
+    def next_world
+      @player.last_stage += 1
+      @player.last_world += 1
+      @controller = World.new(@player.last_world)
+    end
+    
+    def show_finish
+      puts 'showing game ending'
     end
 
     def update

@@ -66,3 +66,9 @@ confirm				ARE YOU SURE?
 yes					Yes
 no					No
 time				TIME: 
+no_moves_left		NO MOVES LEFT!
+level_completed		LEVEL COMPLETED!
+world_completed		 - Scene Completed!
+bonus_message		You have discovered a new Nisled word: '{}', which means '{}'.\nThe white pieces have merged into a large crystal, the {} crystal!
+click_to_continue	(Click to continue)
+press_to_continue	(Press the space bar to continue)
