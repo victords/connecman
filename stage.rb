@@ -445,6 +445,13 @@ class Stage
     @items.delete(type) if @items[type] == 0
   end
   
+  def use_hourglass
+    @time_stopped = Const::STOP_TIME_DURATION
+    @effects << HourglassEffect.new
+    @effects << TimerEffect.new
+    consume_item(:hourglass)
+  end
+  
   def die
     @state = :dead
     @timer = 0
@@ -543,6 +550,23 @@ class Stage
     @buttons[@state].each(&:update) if @buttons[@state]
     return unless @state == :main
     
+    if ConnecMan.shortcut_keys
+      if KB.key_pressed?(Gosu::KB_P)
+        @state = :paused
+      elsif KB.key_pressed?(Gosu::KB_R)
+        @confirm_exit = false
+        @state = :confirm
+      elsif KB.key_pressed?(Gosu::KB_C)
+        ConnecMan.mouse_control = !ConnecMan.mouse_control
+      elsif KB.key_pressed?(Gosu::KB_W) && @items[:waveTransmitter]
+        @action = :wave_transmitter_source
+      elsif KB.key_pressed?(Gosu::KB_D) && @items[:dynamite]
+        @action = :dynamite
+      elsif KB.key_pressed?(Gosu::KB_H) && @items[:hourglass]
+        use_hourglass
+      end
+    end
+    
     if @time_stopped
       @time_stopped -= 1
       if @time_stopped == 0
@@ -587,10 +611,7 @@ class Stage
         elsif k == :dynamite
           @action = :dynamite
         else
-          @time_stopped = Const::STOP_TIME_DURATION
-          @effects << HourglassEffect.new
-          @effects << TimerEffect.new
-          consume_item(:hourglass)
+          use_hourglass
         end
         @selected_piece = nil
         clicked_item = true
