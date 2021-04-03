@@ -75,6 +75,11 @@ total				TOTAL:
 new_high_score		NEW HIGH SCORE!
 new_letters			NEW NISLED LETTERS LEARNED!
 world_completed		 - Scene Completed!
-bonus_message		You have discovered a new Nisled word: '{}', which means '{}'.\nThe white pieces have merged into a large crystal, the {} crystal!
-click_to_continue	(Click to continue)
-press_to_continue	(Press the space bar to continue)
+bonus_message		You have discovered a new Nisled word: '$', which means '$'.\nThe white pieces have merged into a large crystal, the $ crystal!
+click_to_continue	Click to continue
+press_to_continue	Press the space bar to continue
+type_name			Type a name:
+save				Save
+dont_save			Don't save
+overwrite_confirm	A game named '$' already exists. Do you want to overwrite it?
+game_saved			Game successfully saved.

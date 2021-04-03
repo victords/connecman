@@ -168,6 +168,12 @@ class ConnecMan
       back
       @controller.resume
     end
+
+    def save_game(name)
+      File.open("#{@saves_path}/#{name}", 'w') do |f|
+        f.write("#{@player.completed ? '!' : ''}##{@player.last_stage}##{@player.scores.join(',')}")
+      end
+    end
     
     def next_level
       @player.last_stage += 1
@@ -182,6 +188,7 @@ class ConnecMan
     end
     
     def show_finish
+      @player.completed = true
       puts 'showing game ending'
     end
 

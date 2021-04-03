@@ -75,6 +75,11 @@ total				TOTAL:
 new_high_score		NOVO RECORDE!
 new_letters			NOVAS LETRAS NISLED DESCOBERTAS!
 world_completed		 - Cenário Completo!
-bonus_message		Você descobriu uma nova palavra em Nisled: '{}', que significa '{}'.\nAs peças brancas se fundiram em um grande cristal, o cristal de {}!
-click_to_continue	(Clique para continuar)
-press_to_continue	(Aperte a barra de espaço para continuar)
+bonus_message		Você descobriu uma nova palavra em Nisled: '$', que significa '$'.\nAs peças brancas se fundiram em um grande cristal, o cristal de $!
+click_to_continue	Clique para continuar
+press_to_continue	Aperte a barra de espaço para continuar
+type_name			Digite um nome:
+save				Salvar
+dont_save			Não salvar
+overwrite_confirm	Um jogo chamado '$' já existe. Deseja substituí-lo?
+game_saved			Jogo salvo com sucesso.
