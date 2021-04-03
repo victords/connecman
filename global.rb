@@ -63,6 +63,12 @@ class ConnecMan
       @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZÚ', 31, 41, 30)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
       @cursor = Res.img(:cursor_Default, true)
+      @transition_effects = [
+        GameObject.new(0, -300, 800, 300, :fx_transition_1),
+        GameObject.new(800, 0, 400, 600, :fx_transition_2),
+        GameObject.new(0, 600, 800, 300, :fx_transition_3),
+        GameObject.new(-400, 0, 400, 600, :fx_transition_4),
+      ]
 
       @language_changed = Event.new
     end
@@ -89,6 +95,12 @@ class ConnecMan
 
     def show_main_menu
       @controller = Menu.new
+    end
+    
+    def transition(&callback)
+      ConnecMan.play_sound('0')
+      @transitioning = 0
+      @callback = callback
     end
 
     def text(key)
@@ -148,28 +160,39 @@ class ConnecMan
     end
 
     def start_game
-      @controller = World.new(@player.last_world)
+      transition do
+        @controller = World.new(@player.last_world)
+      end
     end
 
     def load_stage(world, index)
-      @prev_controller = @controller
-      stage_num = (world - 1) * 6 + index + 1
-      @controller = Stage.new(stage_num)
+      transition do
+        @prev_controller = @controller
+        stage_num = (world - 1) * 6 + index + 1
+        @controller = Stage.new(stage_num)
+      end
     end
 
     def show_status
-      @prev_controller = @controller
-      @controller = StatusScreen.new
+      transition do
+        @prev_controller = @controller
+        @controller = StatusScreen.new
+      end
     end
     
     def back
-      @controller = @prev_controller
-      @prev_controller = nil
+      transition do
+        @controller = @prev_controller
+        @prev_controller = nil
+      end
     end
     
     def back_to_world_map
-      back
-      @controller.resume
+      transition do
+        @controller = @prev_controller
+        @prev_controller = nil
+        @controller.resume
+      end
     end
 
     def save_game(name)
@@ -180,19 +203,25 @@ class ConnecMan
     
     def next_level
       @player.last_stage += 1
-      @prev_controller.advance_level
-      @controller = Stage.new(@controller.num + 1)
+      transition do
+        @prev_controller.advance_level
+        @controller = Stage.new(@controller.num + 1)
+      end
     end
     
     def next_world
       @player.last_stage += 1
       @player.last_world += 1
-      @controller = World.new(@player.last_world)
+      transition do
+        @controller = World.new(@player.last_world)
+      end
     end
     
     def show_game_end
       @player.completed = true
-      @controller = Credits.new
+      transition do
+        @controller = Credits.new
+      end
     end
 
     def update
@@ -200,12 +229,47 @@ class ConnecMan
         @full_screen = !@full_screen
       end
       
-      @controller.update
+      if @transitioning == 0
+        @transition_effects.each_with_index do |t, i|
+          aim = case i
+                when 0, 3 then Vector.new(0, 0)
+                when 1 then Vector.new(400, 0)
+                when 2 then Vector.new(0, 300)
+                end
+          t.move_free(aim, i % 2 == 0 ? 6 : 8)
+        end
+        if @transition_effects[0].speed.y == 0
+          @transitioning = 1
+          @timer = 0
+        end
+      elsif @transitioning == 1
+        @timer += 1
+        if @timer == 30
+          @callback.call
+          @transitioning = 2
+        end
+      elsif @transitioning == 2
+        @transition_effects.each_with_index do |t, i|
+          aim = case i
+                when 0 then Vector.new(0, -300)
+                when 1 then Vector.new(800, 0)
+                when 2 then Vector.new(0, 600)
+                when 3 then Vector.new(-400, 0)
+                end
+          t.move_free(aim, i % 2 == 0 ? 6 : 8)
+        end
+        if @transition_effects[0].speed.y == 0
+          @transitioning = nil
+        end
+      else
+        @controller.update
+      end
     end
 
     def draw
       @controller.draw
-      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @controller.is_a?(Stage)
+      @transition_effects.each(&:draw) if @transitioning
+      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @transitioning || @controller.is_a?(Stage)
     end
   end
 end
