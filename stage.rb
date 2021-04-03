@@ -94,6 +94,7 @@ class Stage
     @font = ConnecMan.image_font
     # preload as tileable
     _ = Res.imgs(:fx_ways, 3, 2, false, '.png', false, true)
+    _ = Res.imgs(:fx_specialWays, 3, 2, false, '.png', false, true)
     
     @buttons = {
       main: [
@@ -446,14 +447,11 @@ class Stage
   end
   
   def die
-    Gosu::Song.current_song.stop
-    ConnecMan.play_sound('11')
     @state = :dead
+    @timer = 0
   end
   
   def finish
-    Gosu::Song.current_song.stop
-    ConnecMan.play_sound('10')
     @state = :finished
     @timer = 0
     
@@ -481,9 +479,18 @@ class Stage
       return
     end
     
-    if @state == :finished
-      @timer += 1 if @timer < 120
-      if @timer == 120 && Mouse.button_pressed?(:left)
+    if @state == :dead
+      if @timer == 59
+        Gosu::Song.current_song.stop
+        ConnecMan.play_sound('11')
+      end
+      @timer += 1 if @timer < 60
+    elsif @state == :finished
+      @timer += 1 if @timer < 180
+      if @timer == 60
+        Gosu::Song.current_song.stop
+        ConnecMan.play_sound('10')
+      elsif @timer == 180 && Mouse.button_pressed?(:left)
         if @num == Const::LAST_STAGE
           if ConnecMan.player.completed
             ConnecMan.back_to_world_map
@@ -503,9 +510,20 @@ class Stage
         end
       end
     elsif @state == :finish_message
-      @timer += 1 if @timer < 120
-      if @timer == 120 && Mouse.button_pressed?(:left)
+      @timer += 1 if @timer < 180
+      if @timer == 180 && Mouse.button_pressed?(:left)
         ConnecMan.next_world
+      end
+    end
+
+    if @state == :main || @state == :dead || @state == :finished
+      @effects.reverse_each do |e|
+        e.update
+        @effects.delete(e) if e.dead
+      end
+      @score_effects.reverse_each do |e|
+        e[:lifetime] -= 1
+        @score_effects.delete(e) if e[:lifetime] == 0
       end
     end
     
@@ -533,15 +551,6 @@ class Stage
           cell.update(self) if cell
         end if row
       end
-    end
-    
-    @effects.reverse_each do |e|
-      e.update
-      @effects.delete(e) if e.dead
-    end
-    @score_effects.reverse_each do |e|
-      e[:lifetime] -= 1
-      @score_effects.delete(e) if e[:lifetime] == 0
     end
     
     row = (Mouse.y - @margin.y) / Const::TILE_SIZE
@@ -602,11 +611,11 @@ class Stage
                   @word_effects.clear
                   @word_pieces << piece
                   @word_pieces.each do |p|
-                    connect(p)
                     add_piece_effect(p)
+                    connect(p)
                   end
                   ConnecMan.play_sound('5')
-                  @selected_piece = nil
+                  @selected_piece = @hovered_piece = nil
                   finish
                 else
                   add_path_effects(path, true)
@@ -695,13 +704,13 @@ class Stage
     end
     @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
     @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
+
+    @panel.draw(0, 480, 0)
+    @effects.each(&:draw)
     @word_effects.each(&:draw)
     @score_effects.each do |e|
       @font.draw_text_rel(e[:text], e[:x], e[:y] - 20 + e[:lifetime] / 3, 0, 0.5, 0.5, 0.5, 0.5, e[:color])
     end
-
-    @panel.draw(0, 480, 0)
-    @effects.each(&:draw)
     @font.draw_text(ConnecMan.text(:score) + @score[:default].to_s, 50, 502, 0, 0.5, 0.5, WHITE)
     @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
     @items.each_with_index do |(k, v), i|
@@ -718,9 +727,9 @@ class Stage
       draw_overlay
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
-    elsif @state == :dead
+    elsif @state == :dead && @timer >= 60
       @font.draw_text_rel(ConnecMan.text(@time_left == 0 ? :time_up : :no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
-    elsif @state == :finished
+    elsif @state == :finished && @timer >= 60
       @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 160, 0, 0.5, 0, 1, 1, LIGHT_BLUE)
       @font.draw_text_rel(ConnecMan.text(:time_bonus) + @score[:time].to_s, 400, 210, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
       @font.draw_text_rel(ConnecMan.text(:items_bonus) + @score[:items].to_s, 400, 235, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
@@ -736,10 +745,10 @@ class Stage
       msg = ConnecMan.text(:bonus_message).sub('{}', NISLED_WORDS[num]).gsub('{}', ConnecMan.text("crystal_#{num}"))
       ConnecMan.text_helper.write_breaking(msg, 120, 120, 560, :justified, 0xffffff, 255, 0, 0.75, 0.75)
       img = Res.img("messages_bonus_#{num}")
-      img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2, 0)
-      ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 120
+      img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2 + 20, 0)
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 180
     end
-    draw_buttons(@state) unless @state == :options
+    draw_buttons(@state) unless @state == :options || ((@state == :dead || @state == :finished) && @timer < 60)
 
     cursor = if @state == :main
                if @action == :wave_transmitter_source
@@ -754,6 +763,6 @@ class Stage
              else
                Res.img(:cursor_Default)
              end
-    cursor.draw(Mouse.x - cursor.width / 2, Mouse.y, 10) unless @controller.is_a?(Stage)
+    cursor.draw(Mouse.x - cursor.width / 2, Mouse.y, 10)
   end
 end
