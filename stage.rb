@@ -175,6 +175,7 @@ class Stage
     pieces_by_type = {}
     @pairs = {}
     @white_pieces = []
+    @piece_count = 0
     @movable_piece_count = 0
     while i < data[2].size
       token = ''
@@ -222,7 +223,11 @@ class Stage
           @pairs[key] << [p, piece]
         end
         pieces_by_type[key] << piece
-        @white_pieces[@word.index(piece.symbol)] = piece if piece.type == 9
+        if piece.type == 9
+          @white_pieces[@word.index(piece.symbol)] = piece
+        else
+          @piece_count += 1
+        end
         @movable_piece_count += 1 if piece.movable.any?
         
         col += 1
@@ -373,6 +378,7 @@ class Stage
       piece.change_type(piece.type - 3)
     else
       @pieces[piece.row][piece.col] = nil
+      @piece_count -= 1
     end
     check_melt(piece.row - 1, piece.col)
     check_melt(piece.row, piece.col + 1)
@@ -393,11 +399,18 @@ class Stage
     @pieces[row][col] = nil
   end
   
-  def update_pairs(piece1, piece2)
-    if piece1 && piece2
-      key = "#{piece1.type >= 3 && piece1.type <= 5 ? piece1.type - 3 : piece1.type}|#{piece1.symbol}"
+  def update_pairs(piece1, piece2, strong1, strong2)
+    key = "#{piece1.type}|#{piece1.symbol}"
+    unless strong1
       @pairs[key].reverse_each do |p|
-        next unless p[0] == piece1 || p[1] == piece1 || p[0] == piece2 || p[1] == piece2
+        next unless p[0] == piece1 || p[1] == piece1
+        @pairs[key].delete(p)
+        @pairs.delete(key) if @pairs[key].empty?
+      end
+    end
+    if piece2 && !strong2 && @pairs[key]
+      @pairs[key].reverse_each do |p|
+        next unless p[0] == piece2 || p[1] == piece2
         @pairs[key].delete(p)
         @pairs.delete(key) if @pairs[key].empty?
       end
@@ -419,7 +432,13 @@ class Stage
     end
     
     if @pairs.empty?
-      finish unless @word
+      unless @word
+        if @piece_count > 0
+          die
+        else
+          finish
+        end
+      end
     else
       @pairs.each do |_, ps|
         ps.each do |p|
@@ -452,9 +471,9 @@ class Stage
     consume_item(:hourglass)
   end
   
-  def die
+  def die(time_up = false)
     @state = :dead
-    @timer = 0
+    @timer = time_up ? 59 : 0
   end
   
   def finish
@@ -603,7 +622,7 @@ class Stage
       if @timer == 60
         @time_left -= 1
         if @time_left == 0
-          die
+          die(true)
           return
         end
         @timer = 0
@@ -647,10 +666,12 @@ class Stage
     return if clicked_item
     
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
-      @pieces[row][col] = nil unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
+      unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
+        @pieces[row][col] = nil
+        update_pairs(piece, nil, false, false)
+      end
       @effects << Effect.new(col * Const::TILE_SIZE + @margin.x - 9, row * Const::TILE_SIZE + @margin.y - 9, :fx_explosion, 2, 2, 7, [0, 1, 2, 3, 2, 1, 0], nil, '9')
       consume_item(:dynamite)
-      update_pairs(nil, nil)
       @action = :default
     elsif over_selectable_piece
       if @action == :default
@@ -696,9 +717,11 @@ class Stage
               add_path_effects(path)
               add_piece_effect(piece)
               add_piece_effect(@selected_piece)
+              strong1 = piece.type >= 3 && piece.type <= 5
+              strong2 = @selected_piece.type >= 3 && @selected_piece.type <= 5
               connect(piece)
               connect(@selected_piece)
-              update_pairs(piece, @selected_piece)
+              update_pairs(piece, @selected_piece, strong1, strong2)
               ConnecMan.play_sound('5')
               @selected_piece = @hovered_piece = nil
             else
@@ -720,10 +743,12 @@ class Stage
           add_piece_effect(piece)
           add_piece_effect(@selected_piece)
           add_wave_effects(@selected_piece, piece)
+          strong1 = piece.type >= 3 && piece.type <= 5
+          strong2 = @selected_piece.type >= 3 && @selected_piece.type <= 5
           connect(piece)
           connect(@selected_piece)
           consume_item(:waveTransmitter)
-          update_pairs(piece, @selected_piece)
+          update_pairs(piece, @selected_piece, strong1, strong2)
           @selected_piece = nil
           @action = :default
         end
