@@ -763,6 +763,7 @@ class Stage
       @selected_piece.move(row, col)
     else
       @selected_piece = nil
+      @action = :default
     end
   end
   
@@ -843,8 +844,12 @@ class Stage
     @font.draw_text(ConnecMan.text(:score) + @score[:default].to_s, 50, 502, 0, 0.5, 0.5, WHITE)
     @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
     @items.each_with_index do |(k, v), i|
-      Res.img("icon_#{k}").draw(660, 500 + i * 28, 0)
-      @font.draw_text(v.to_s, 690, 502 + i * 28, 0, 0.5, 0.5, WHITE)
+      y = 500 + i * 28
+      Res.img("icon_#{k}").draw(660, y, 0)
+      @font.draw_text(v.to_s, 690, y, 0, 0.5, 0.5, WHITE)
+      if @state == :main && Mouse.over?(660, y, 25, 25)
+        Res.img(:main_ItemHighlight).draw(658, y - 2, 0)
+      end
     end
     
     if @state == :starting
