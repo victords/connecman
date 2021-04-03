@@ -101,3 +101,5 @@ message_6			Cuando vea las piezas blancas, el objetivo es diferente: eliminarlos
 message_7			Ooooh... ¡que cristales hermosos y brillantes! Estas piezas de metal valen más puntos, pero con el tiempo pueden llegar a ser solo un poco más valiosas que las comunes. Las doradas son las más valiosas, seguidas por plata y después por bronce.
 message_10			Algunas piezas pueden moverse en ciertas direcciones, indicado por flechas amarillas en el borde. Para mover una pieza, haga clic en él y luego un espacio en blanco alrededor de él, ya que en una dirección en la que esta pieza se puede mover.
 message_25			Después de haber recogido los cristales de los cuatro elementos, parte ConnecMan a la última isla, donde se encuentra un templo extraño. A continuación se da cuenta de que está ante el enigma último que dejó la civilización Nisled. No sea intimidado por el tamaño de este rompecabezas, ¡y pone su cerebro a trabajar!
+finish_message		¡FELICITACIONES!\n¡SU VIAJE ESTÁ COMPLETA!
+finish_message2		AHORA PUEDES ENTRAR EN EL SALÓN DE LA FAMA.

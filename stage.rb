@@ -515,7 +515,18 @@ class Stage
           if ConnecMan.player.completed
             ConnecMan.back_to_world_map
           else
-            ConnecMan.show_finish
+            ConnecMan.play_sound('4')
+            @final_pieces = [
+              GameObject.new(-64, -64, 64, 64, :main_crystal0),
+              GameObject.new(Const::SCR_W, -64, 64, 64, :main_crystal1),
+              GameObject.new(-64, 480, 64, 64, :main_crystal2),
+              GameObject.new(Const::SCR_W, 480, 64, 64, :main_crystal3),
+            ]
+            @final_piece_positions = [
+              Vector.new(319, 161), Vector.new(415, 161), Vector.new(319, 257), Vector.new(415, 257)
+            ]
+            @state = :final_effect
+            @timer = 0
           end
         elsif @num == ConnecMan.player.last_stage
           if @num % 6 == 0
@@ -534,9 +545,24 @@ class Stage
       if @timer == 180 && Mouse.button_pressed?(:left)
         ConnecMan.next_world
       end
+    elsif @state == :final_effect
+      if @timer < 4
+        @final_pieces[@timer].move_free(@final_piece_positions[@timer], 3)
+        if @final_pieces[@timer].speed.x == 0
+          @timer += 1
+          if @timer == 4
+            @effects << Effect.new(302, 144, :fx_final, 3, 1, 10, [0, 1, 2, 1], 1000)
+          end
+        end
+      else
+        @timer += 1
+        if @timer == 304
+          ConnecMan.show_game_end
+        end
+      end
     end
 
-    if @state == :main || @state == :dead || @state == :finished
+    if @state == :main || @state == :dead || @state == :finished || @state == :final_effect
       @effects.reverse_each do |e|
         e.update
         @effects.delete(e) if e.dead
@@ -837,6 +863,8 @@ class Stage
       img = Res.img("messages_bonus_#{num}")
       img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2 + 20, 0)
       ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 180
+    elsif @state == :final_effect
+      @final_pieces.each(&:draw) if @timer < 4
     end
     draw_buttons(@state) if @buttons[@state] && (@state != :dead || @timer >= 60)
 

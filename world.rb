@@ -1,3 +1,5 @@
+require_relative 'save_menu'
+
 include MiniGL
 
 class World
@@ -7,58 +9,28 @@ class World
     set_world(num)
 
     @water = Res.img(:map_water, true, true)
-    @board = Res.img(:main_Board)
-
-    text = ConnecMan.player.name == '-' ? '' : ConnecMan.player.name
-    @text_field = TextField.new(260, 240, Res.font(:corbel, 32), :main_TextField, :main_TextCursor, nil, 3, 6, 10, true,
-                                text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ') { |t|
-      @buttons[:save][0].visible = t != ''
-    }
-    @buttons = {
-      main: [
-        Button.new(640, 480, nil, nil, :main_btn1) {
-          ConnecMan.load_stage(@num, @cur_spot)
-        },
-        Button.new(640, 520, nil, nil, :main_btn1) {
-          ConnecMan.show_status
-        },
-        Button.new(640, 560, nil, nil, :main_btn1) {
-          if ConnecMan.player.scores.empty?
-            ConnecMan.show_main_menu
-          else
-            @state = :save
-          end
-        },
-      ],
-      save: [
-        Button.new(325, 300, ConnecMan.default_font, ConnecMan.text(:save), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          if File.exist?("#{ConnecMan.saves_path}/#{@text_field.text}")
-            @state = :confirm
-          else
-            save_game
-          end
-        },
-        Button.new(325, 340, ConnecMan.default_font, ConnecMan.text(:dont_save), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          ConnecMan.show_main_menu
-        },
-        Button.new(325, 400, ConnecMan.default_font, ConnecMan.text(:back), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          @state = :main
-        }
-      ],
-      confirm: [
-        Button.new(325, 300, ConnecMan.default_font, ConnecMan.text(:yes), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          save_game
-        },
-        Button.new(325, 340, ConnecMan.default_font, ConnecMan.text(:no), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          @state = :save
-        },
-      ],
-      saved: []
-    }
-    @buttons[:save][0].visible = @text_field.text != ''
-    
     @water_timer = 0
     @alpha = 255
+    
+    @buttons = [
+      Button.new(640, 480, nil, nil, :main_btn1) {
+        ConnecMan.load_stage(@num, @cur_spot)
+      },
+      Button.new(640, 520, nil, nil, :main_btn1) {
+        ConnecMan.show_status
+      },
+      Button.new(640, 560, nil, nil, :main_btn1) {
+        if ConnecMan.player.scores.empty?
+          ConnecMan.show_main_menu
+        else
+          @state = :save
+        end
+      }
+    ]
+    @save_menu = SaveMenu.new(Proc.new {
+      @state = :main
+    })
+    
     @state = :main
   end
 
@@ -115,12 +87,6 @@ class World
     @man.x = @spots[@cur_spot].x
     @man.y = @spots[@cur_spot].y
   end
-  
-  def save_game
-    ConnecMan.save_game(@text_field.text)
-    @state = :saved
-    @timer = 0
-  end
 
   def update
     if @transition
@@ -135,11 +101,10 @@ class World
         @transition = nil
       end
     else
-      @buttons[@state].each(&:update)
-
       if @state == :save
-        @text_field.update
-      elsif @state != :saved
+        @save_menu.update
+      else
+        @buttons.each(&:update)
         @spot_buttons.each_with_index do |s, i|
           s.update if i != @cur_spot && i <= @last_spot
         end
@@ -150,13 +115,6 @@ class World
       if @man.x != @spots[@cur_spot].x || @man.y != @spots[@cur_spot].y
         ConnecMan.play_sound('3') if @man.speed.x == 0 && @man.speed.y == 0
         @man.move_free(@spots[@cur_spot], 4)
-      end
-      
-      if @state == :saved
-        @timer += 1
-        if @timer == 120
-          ConnecMan.show_main_menu
-        end
       end
     end
 
@@ -181,7 +139,7 @@ class World
     @arrow_buttons.each do |b|
       b.draw(@alpha)
     end
-    @buttons[:main].each_with_index do |b, i|
+    @buttons.each_with_index do |b, i|
       b.draw
       text = ConnecMan.text(i == 0 ? :play : i == 1 ? :status : :exit).upcase
       ConnecMan.image_font.draw_text_rel(text, b.x + b.w / 2, b.y + b.h / 2, 0, 0.5, 0.5, 0.6, 0.6, 0xff000000)
@@ -200,18 +158,6 @@ class World
     ConnecMan.image_font.draw_text(ConnecMan.text(:player) + ConnecMan.player.name.upcase, 10, 540, 0, 0.5, 0.5, WHITE)
     ConnecMan.image_font.draw_text(ConnecMan.text(:score) + ConnecMan.player.scores.sum.to_s, 10, 570, 0, 0.5, 0.5, WHITE)
     
-    return if @state == :main
-    
-    @board.draw((Const::SCR_W - @board.width) / 2, (Const::SCR_H - @board.height) / 2, 0)
-    @buttons[@state].each(&:draw)
-    
-    if @state == :save
-      ConnecMan.default_font.draw_text_rel(ConnecMan.text(:type_name), Const::SCR_W / 2, 200, 0, 0.5, 0, 1, 1, WHITE)
-      @text_field.draw
-    elsif @state == :confirm
-      ConnecMan.text_helper.write_breaking(ConnecMan.text(:overwrite_confirm).sub('$', @text_field.text), 260, 200, 280, :justified, 0xffffff, 255, 0, 1, 1)
-    else
-      ConnecMan.default_font.draw_text_rel(ConnecMan.text(:game_saved), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0.5, 1, 1, 0xffffff00)
-    end
+    @save_menu.draw if @state == :save
   end
 end

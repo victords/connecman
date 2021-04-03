@@ -4,6 +4,7 @@ require_relative 'player'
 require_relative 'world'
 require_relative 'status'
 require_relative 'stage'
+require_relative 'credits'
 
 include MiniGL
 
@@ -189,9 +190,9 @@ class ConnecMan
       @controller = World.new(@player.last_world)
     end
     
-    def show_finish
+    def show_game_end
       @player.completed = true
-      puts 'showing game ending'
+      @controller = Credits.new
     end
 
     def update

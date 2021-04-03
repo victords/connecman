@@ -101,3 +101,5 @@ message_6			Quando você vir peças brancas, o objetivo é outro: eliminá-las, 
 message_7			Ooooh... que belos e brilhantes cristais! Essas peças que parecem metálicas valem mais pontos, mas com o tempo podem se tornar apenas um pouco mais valiosas que as comuns. As douradas são as mais valiosas, seguidas pelas de prata e então pelas de bronze.
 message_10			Algumas peças podem ser movidas em certas direções, indicadas por setas amarelas em sua borda. Para mover uma peça, clique nela e depois num espaço em branco em volta dela, desde que em uma direção para a qual essa peça possa se mover.
 message_25			Tendo coletado os cristais dos quatro elementos, ConnecMan parte para a última ilha, onde encontra um estranho templo. Ele então percebe que está diante do último enigma deixado pela civilização Nisled. Não se intimide com o tamanho desse quebra-cabeça, e coloque seu cérebro para trabalhar!
+finish_message		PARABÉNS!\nSUA JORNADA ESTÁ COMPLETA!
+finish_message2		AGORA PODERÁ PARTICIPAR DO HALL DA FAMA.

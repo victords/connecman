@@ -101,3 +101,5 @@ message_6			When you see White Pieces in the board, your objective is different:
 message_7			Oooooh... What shining crystal pieces! These metal-like pieces are more valuable, but with time they will become almost like common pieces. The golden ones are the most valuable, followed by silver and then by bronze.
 message_10			Some pieces can be moved in certain directions, signed by small arrows on their border. To move a piece, just click it and then in an empty space around it, since it's in a direction that this piece can move.
 message_25			Having collected the crystals of the four elements, ConnecMan departs for the last island, where he finds a strange temple. He then realizes he is before the last puzzle left by the Nisled civilization. Do not be intimidated by the size of this puzzle and put your brain to work!
+finish_message		CONGRATULATIONS!\nYOUR JOURNEY IS COMPLETE!
+finish_message2		NOW YOU CAN JOIN HALL OF FAME.
