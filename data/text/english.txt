@@ -83,3 +83,21 @@ save				Save
 dont_save			Don't save
 overwrite_confirm	A game named '$' already exists. Do you want to overwrite it?
 game_saved			Game successfully saved.
+message_title_1		Connecting pieces
+message_title_2		Ice blocks
+message_title_3		Connect twice!
+message_title_4		Wave transmitter
+message_title_5		Hourglass
+message_title_6		White pieces and dynamites
+message_title_7		Metal pieces
+message_title_10	Moving pieces
+message_title_25	The final challenge!
+message_1			Select a piece and then select another with same color and symbol. The connection between them, an 'energy line', can be composed of at maximum three segments. Stone blocks will block energy lines.
+message_2			Ice blocks work the same as stone blocks, but they can be eliminated by connecting pieces around them.
+message_3			Some pieces need to be connected to two others, in order to be eliminated.
+message_4			When an energy line can't be formed between two pieces, a Wave Transmitter (shortcut key W) may come in handy: it transmits the energy needed to create the connection between two pieces, regardless of their positions.
+message_5			Not enough time? Then, just stop it for some seconds, using an Hourglass (shortcut key H).
+message_6			When you see White Pieces in the board, your objective is different: you just have to eliminate them, not worrying about other pieces. However, in order to do that, you must connect all of them at once, and in the correct order. And here comes another item: Dynamites (shortcut key D) can destroy anything in the board, except common stone blocks, and, as you don't want to make certain levels impossible, White Pieces.
+message_7			Oooooh... What shining crystal pieces! These metal-like pieces are more valuable, but with time they will become almost like common pieces. The golden ones are the most valuable, followed by silver and then by bronze.
+message_10			Some pieces can be moved in certain directions, signed by small arrows on their border. To move a piece, just click it and then in an empty space around it, since it's in a direction that this piece can move.
+message_25			Having collected the crystals of the four elements, ConnecMan departs for the last island, where he finds a strange temple. He then realizes he is before the last puzzle left by the Nisled civilization. Do not be intimidated by the size of this puzzle and put your brain to work!

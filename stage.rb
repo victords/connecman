@@ -243,7 +243,7 @@ class Stage
     @score_effects = []
     @word_effects = []
     @action = :default
-    @state = :main
+    @state = :starting
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
   end
@@ -473,12 +473,26 @@ class Stage
   end
   
   def update
-    if @state == :options
+    if @state == :starting
+      @timer += 1
+      if @timer == 120
+        if @num == ConnecMan.player.last_stage && !ConnecMan.player.completed && File.exist?("#{Res.prefix}img/messages/#{@num}.png")
+          @state = :start_message
+        else
+          @state = :main
+        end
+        @timer = 0
+      end
+    elsif @state == :start_message
+      @timer += 1 if @timer < 120
+      if @timer == 120 && Mouse.button_pressed?(:left)
+        @state = :main
+        @timer = 0
+      end
+    elsif @state == :options
       Options.update
       return
-    end
-    
-    if @state == :dead
+    elsif @state == :dead
       if @timer == 59
         Gosu::Song.current_song.stop
         ConnecMan.play_sound('11')
@@ -761,7 +775,18 @@ class Stage
       @font.draw_text(v.to_s, 690, 502 + i * 28, 0, 0.5, 0.5, WHITE)
     end
     
-    if @state == :options
+    if @state == :starting
+      @font.draw_text_rel(ConnecMan.text(:level).upcase + @num.to_s, 400, 240, 0, 0.5, 0.5, 1, 1, YELLOW)
+    elsif @state == :start_message
+      draw_overlay
+      board_y = (480 - @board.height) / 2
+      @board.draw((Const::SCR_W - @board.width) / 2, board_y, 0)
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text("message_title_#{@num}"), Const::SCR_W / 2, board_y + 20, 0, 0.5, 0, 1, 1, YELLOW)
+      ConnecMan.text_helper.write_breaking(ConnecMan.text("message_#{@num}"), 120, 120, 560, :justified, 0xffffff)
+      img = Res.img("messages_#{@num}")
+      img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2 + 70, 0)
+      ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 120
+    elsif @state == :options
       draw_buttons(:main)
       draw_overlay
       Options.draw
@@ -781,10 +806,10 @@ class Stage
       @font.draw_text_rel(ConnecMan.text(:new_letters), 400, 310, 0, 0.5, 0, 0.5, 0.5, YELLOW) if @new_letters
       @font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue").upcase, 400, 350, 0, 0.5, 0, 0.4, 0.4, WHITE) if @timer == 180
     elsif @state == :finish_message
-      num = (@num - 1) / 6
-      board_y = (480 - @board.height) / 2
       draw_overlay
-      @board.draw((Const::SCR_W - @board.width) / 2, (480 - @board.height) / 2, 0)
+      board_y = (480 - @board.height) / 2
+      @board.draw((Const::SCR_W - @board.width) / 2, board_y, 0)
+      num = (@num - 1) / 6
       ConnecMan.default_font.draw_text_rel(ConnecMan.text("world_#{num + 1}") + ConnecMan.text(:world_completed), Const::SCR_W / 2, board_y + 20, 0, 0.5, 0, 1, 1, WHITE)
       msg = ConnecMan.text(:bonus_message).sub('$', NISLED_WORDS[num]).gsub('$', ConnecMan.text("crystal_#{num}"))
       ConnecMan.text_helper.write_breaking(msg, 120, 120, 560, :justified, 0xffffff, 255, 0, 0.75, 0.75)
@@ -792,7 +817,7 @@ class Stage
       img.draw((Const::SCR_W - img.width) / 2, (480 - img.height) / 2 + 20, 0)
       ConnecMan.default_font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue"), Const::SCR_W / 2, 400, 0, 0.5, 0, 0.75, 0.75, WHITE) if @timer == 180
     end
-    draw_buttons(@state) unless @state == :options || @state == :finished || @state == :finish_message || @state == :dead && @timer < 60
+    draw_buttons(@state) if @buttons[@state] && (@state != :dead || @timer >= 60)
 
     cursor = if @state == :main
                if @action == :wave_transmitter_source

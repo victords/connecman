@@ -83,3 +83,21 @@ save				Guardar
 dont_save			No guardar
 overwrite_confirm	Ya existe un juego llamado '$'. ¿Deseas sustituirlo?
 game_saved			Juego guardado con éxito.
+message_title_1		Conectando piezas
+message_title_2		Bloques de hielo
+message_title_3		¡Conecta dos veces!
+message_title_4		Transmisor de onda
+message_title_5		Reloj de Arena
+message_title_6		Piezas Blancas y dinamitas
+message_title_7		Piezas metálicas
+message_title_10	Moviendo piezas
+message_title_25	¡El desafío final!
+message_1			Seleccione una pieza y luego otra con el mismo color y mismo símbolo. La conexión formado, una 'línea de energía', puede estar compuesto por un máximo de tres segmentos. Los bloques de piedra bloquean líneas de energía.
+message_2			Los bloques de hielo actúan como la piedra, pero se pueden eliminar mediante la conexión de las piezas que están muy cerca.
+message_3			Algunas piezas necesitan ser conectadas dos veces para ser eliminadas.
+message_4			Cuando no se puede construir una línea de energía entre duas piezas, el transmisor de onda (tecla de acceso W) puede ser útil: transmite a través de ondas la energía necesaria para la conexión, independientemente de las posiciones de las piezas.
+message_5			¿No hay tiempo suficiente? Da una breve parada, usando un Reloj de Arena (tecla de acceso H).
+message_6			Cuando vea las piezas blancas, el objetivo es diferente: eliminarlos, podendo eliminar, o no, las otras. Pero para ello es necesario conectar todos a la vez, y en el orden correcto. Y aquí hay otro elemento: la Dinamita (tecla de acceso D), que puede destruir cualquier elemento de la pantalla, excepto las piedras (cuando no dividida), y las piezas blancas, que acabamos de ver.
+message_7			Ooooh... ¡que cristales hermosos y brillantes! Estas piezas de metal valen más puntos, pero con el tiempo pueden llegar a ser solo un poco más valiosas que las comunes. Las doradas son las más valiosas, seguidas por plata y después por bronce.
+message_10			Algunas piezas pueden moverse en ciertas direcciones, indicado por flechas amarillas en el borde. Para mover una pieza, haga clic en él y luego un espacio en blanco alrededor de él, ya que en una dirección en la que esta pieza se puede mover.
+message_25			Después de haber recogido los cristales de los cuatro elementos, parte ConnecMan a la última isla, donde se encuentra un templo extraño. A continuación se da cuenta de que está ante el enigma último que dejó la civilización Nisled. No sea intimidado por el tamaño de este rompecabezas, ¡y pone su cerebro a trabajar!
