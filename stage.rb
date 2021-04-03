@@ -95,6 +95,7 @@ class Stage
     # preload as tileable
     _ = Res.imgs(:fx_ways, 3, 2, false, '.png', false, true)
     _ = Res.imgs(:fx_specialWays, 3, 2, false, '.png', false, true)
+    @frame_color = world == 4 ? WHITE : 0xff333333
     
     @buttons = {
       main: [
@@ -703,6 +704,50 @@ class Stage
     @highlight.draw(@hovered_piece.col * Const::TILE_SIZE + @margin.x, @hovered_piece.row * Const::TILE_SIZE + @margin.y, 0) if @hovered_piece
     @highlight.draw(@selected_piece.col * Const::TILE_SIZE + @margin.x, @selected_piece.row * Const::TILE_SIZE + @margin.y, 0, 1, 1, 0xffffff00) if @selected_piece
 
+    x1 = @margin.x - 2
+    x2 = @margin.x + @cols * Const::TILE_SIZE + 2
+    y1 = @margin.y - 2
+    y2 = @margin.y + @rows * Const::TILE_SIZE + 2
+    c2 = 0x00ffffff & @frame_color
+    if @rows < Const::MAX_ROWS
+      G.window.draw_quad(x1, y1, @frame_color,
+                         x2, y1, @frame_color,
+                         x1, y1 - 15, c2,
+                         x2, y1 - 15, c2, 0)
+      G.window.draw_quad(x1, y2, @frame_color,
+                         x2, y2, @frame_color,
+                         x1, y2 + 15, c2,
+                         x2, y2 + 15, c2, 0)
+      if @cols < Const::MAX_COLS
+        G.window.draw_quad(x1, y1, @frame_color,
+                           x1 - 15, y1, c2,
+                           x1, y1 - 15, c2,
+                           x1 - 15, y1 - 15, c2, 0)
+        G.window.draw_quad(x1, y2, @frame_color,
+                           x1 - 15, y2, c2,
+                           x1, y2 + 15, c2,
+                           x1 - 15, y2 + 15, c2, 0)
+        G.window.draw_quad(x2, y1, @frame_color,
+                           x2 + 15, y1, c2,
+                           x2, y1 - 15, c2,
+                           x2 + 15, y1 - 15, c2, 0)
+        G.window.draw_quad(x2, y2, @frame_color,
+                           x2 + 15, y2, c2,
+                           x2, y2 + 15, c2,
+                           x2 + 15, y2 + 15, c2, 0)
+      end
+    end
+    if @cols < Const::MAX_COLS
+      G.window.draw_quad(x1, y1, @frame_color,
+                         x1, y2, @frame_color,
+                         x1 - 15, y1, c2,
+                         x1 - 15, y2, c2, 0)
+      G.window.draw_quad(x2, y1, @frame_color,
+                         x2, y2, @frame_color,
+                         x2 + 15, y1, c2,
+                         x2 + 15, y2, c2, 0)
+    end
+    
     @panel.draw(0, 480, 0)
     @effects.each(&:draw)
     @word_effects.each(&:draw)

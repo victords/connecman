@@ -13,6 +13,8 @@ module Const
   TILE_SIZE = 32
   STOP_TIME_DURATION = 1800
   LAST_STAGE = 25
+  MAX_ROWS = 15
+  MAX_COLS = 25
 end
 
 class ConnecMan
