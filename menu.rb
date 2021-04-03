@@ -73,8 +73,10 @@ class Menu
       name = s.split('/')[-1]
       @saves << name
       data = File.read(s).split('#', -1)
-      total_score = data[2].split(',').map(&:to_i).sum
-      hall_of_fame << { name: name, score: total_score }
+      if data[0] == '!'
+        total_score = data[2].split(',').map(&:to_i).sum
+        hall_of_fame << { name: name, score: total_score }
+      end
     end
     @hall_of_fame = hall_of_fame[0..9].sort! { |a, b| b[:score] <=> a[:score] }
 
