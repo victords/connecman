@@ -1,4 +1,5 @@
 lang_name			Español
+presents			Victor David Santos presenta...
 play				Jugar
 instructions		Instrucciones
 options				Opciones

@@ -16,7 +16,7 @@ class ConnecManWindow < GameWindow
     ConnecMan.initialize(dir)
     super(Const::SCR_W, Const::SCR_H, ConnecMan.full_screen)
 
-    ConnecMan.show_main_menu
+    ConnecMan.show_presentation
   end
 
   def needs_cursor?

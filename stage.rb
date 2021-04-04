@@ -127,7 +127,7 @@ class Stage
           if @confirm_exit
             ConnecMan.back_to_world_map
           else
-            start(num)
+            restart
           end
         },
         Button.new(325, 320, nil, nil, :main_btn1) {
@@ -136,7 +136,7 @@ class Stage
       ],
       dead: [
         Button.new(245, 550, nil, nil, :main_btn1) {
-          start(num)
+          restart
         },
         Button.new(405, 550, nil, nil, :main_btn1) {
           ConnecMan.back_to_world_map
@@ -150,11 +150,11 @@ class Stage
       confirm: [:yes, :no]
     }
     
-    start(num)
+    start
   end
   
-  def start(num)
-    data = File.read("#{Res.prefix}levels/#{'%02d' % num}.cman").split('#')
+  def start
+    data = File.read("#{Res.prefix}levels/#{'%02d' % @num}.cman").split('#')
     general = data[0].split(',')
     @time_left = general[0].to_i
     @rows = general[1].to_i
@@ -251,6 +251,12 @@ class Stage
     @state = :starting
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
+  end
+
+  def restart
+    ConnecMan.transition do
+      start
+    end
   end
   
   def set_piece(piece)
@@ -400,8 +406,8 @@ class Stage
   end
   
   def update_pairs(piece1, piece2, strong1, strong2)
-    key = "#{piece1.type}|#{piece1.symbol}"
-    unless strong1
+    key = piece1 ? "#{piece1.type}|#{piece1.symbol}" : nil
+    if piece1 && !strong1
       @pairs[key].reverse_each do |p|
         next unless p[0] == piece1 || p[1] == piece1
         @pairs[key].delete(p)
@@ -502,8 +508,9 @@ class Stage
     if @state == :starting
       @timer += 1
       if @timer == 120
-        if @num == ConnecMan.player.last_stage && !ConnecMan.player.completed && File.exist?("#{Res.prefix}img/messages/#{@num}.png")
+        if !@message_shown && @num == ConnecMan.player.last_stage && !ConnecMan.player.completed && File.exist?("#{Res.prefix}img/messages/#{@num}.png")
           @state = :start_message
+          @message_shown = true
         else
           @state = :main
         end
@@ -668,10 +675,11 @@ class Stage
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
       unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
         @pieces[row][col] = nil
-        update_pairs(piece, nil, false, false)
+        update_pairs(piece.is_a?(Piece) ? piece : nil, nil, false, false)
       end
       @effects << Effect.new(col * Const::TILE_SIZE + @margin.x - 9, row * Const::TILE_SIZE + @margin.y - 9, :fx_explosion, 2, 2, 7, [0, 1, 2, 3, 2, 1, 0], nil, '9')
       consume_item(:dynamite)
+      @hovered_piece = nil
       @action = :default
     elsif over_selectable_piece
       if @action == :default

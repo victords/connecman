@@ -85,7 +85,6 @@ class Menu
     @instructions_images = Res.imgs(:main_instructions, 1, 8)
 
     set_state :main, false
-    ConnecMan.play_song(Res.song(:Opening, true, '.mp3'))
   end
 
   def set_state(state, play_sound = true)

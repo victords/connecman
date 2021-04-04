@@ -93,13 +93,23 @@ class ConnecMan
       end
     end
 
-    def show_main_menu
-      @controller = Menu.new
+    def show_presentation
+      ConnecMan.play_song(Res.song(:Opening, true, '.mp3'))
+      @controller = :opening
+      @timer = 0
     end
     
-    def transition(&callback)
+    def show_main_menu(play_song = true)
+      transition(play_song) do
+        ConnecMan.play_song(Res.song(:Opening, true, '.mp3')) if play_song
+        @controller = Menu.new
+      end
+    end
+    
+    def transition(stop_music = true, &callback)
       ConnecMan.play_sound('0')
       @transitioning = 0
+      @stop_music = stop_music
       @callback = callback
     end
 
@@ -174,14 +184,14 @@ class ConnecMan
     end
 
     def show_status
-      transition do
+      transition(false) do
         @prev_controller = @controller
         @controller = StatusScreen.new
       end
     end
     
     def back
-      transition do
+      transition(false) do
         @controller = @prev_controller
         @prev_controller = nil
       end
@@ -239,6 +249,7 @@ class ConnecMan
           t.move_free(aim, i % 2 == 0 ? 6 : 8)
         end
         if @transition_effects[0].speed.y == 0
+          Gosu::Song.current_song.stop if @stop_music && Gosu::Song.current_song
           @transitioning = 1
           @timer = 0
         end
@@ -261,13 +272,22 @@ class ConnecMan
         if @transition_effects[0].speed.y == 0
           @transitioning = nil
         end
+      elsif @controller == :opening
+        @timer += 1
+        if @timer == 180 || Mouse.button_pressed?(:left)
+          show_main_menu(false)
+        end
       else
         @controller.update
       end
     end
 
     def draw
-      @controller.draw
+      if @controller == :opening
+        @default_font.draw_text_rel(ConnecMan.text(:presents), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0.5, 1, 1, 0xffffffff)
+      else
+        @controller.draw
+      end
       @transition_effects.each(&:draw) if @transitioning
       @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @transitioning || @controller.is_a?(Stage)
     end
