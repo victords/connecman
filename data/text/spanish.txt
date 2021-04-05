@@ -1,4 +1,5 @@
 lang_name			Español
+powered_by			Desarrollado con
 presents			Victor David Santos presenta...
 play				Jugar
 instructions		Instrucciones

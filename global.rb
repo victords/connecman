@@ -1,5 +1,6 @@
 require 'fileutils'
 require_relative 'event'
+require_relative 'opening'
 require_relative 'player'
 require_relative 'world'
 require_relative 'status'
@@ -94,9 +95,7 @@ class ConnecMan
     end
 
     def show_presentation
-      ConnecMan.play_song(Res.song(:Opening, true, '.mp3'))
-      @controller = :opening
-      @timer = 0
+      @controller = Opening.new
     end
     
     def show_main_menu(play_song = true)
@@ -272,22 +271,13 @@ class ConnecMan
         if @transition_effects[0].speed.y == 0
           @transitioning = nil
         end
-      elsif @controller == :opening
-        @timer += 1
-        if @timer == 180 || Mouse.button_pressed?(:left)
-          show_main_menu(false)
-        end
       else
         @controller.update
       end
     end
 
     def draw
-      if @controller == :opening
-        @default_font.draw_text_rel(ConnecMan.text(:presents), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0.5, 1, 1, 0xffffffff)
-      else
-        @controller.draw
-      end
+      @controller.draw
       @transition_effects.each(&:draw) if @transitioning
       @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @transitioning || @controller.is_a?(Stage)
     end
