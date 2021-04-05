@@ -826,42 +826,26 @@ class Stage
     y2 = @margin.y + @rows * Const::TILE_SIZE + 2
     c2 = 0x00ffffff & @frame_color
     if @rows < Const::MAX_ROWS
+      offset = @cols < Const::MAX_COLS ? 15 : 0
       G.window.draw_quad(x1, y1, @frame_color,
                          x2, y1, @frame_color,
-                         x1, y1 - 15, c2,
-                         x2, y1 - 15, c2, 0)
+                         x1 - offset, y1 - 15, c2,
+                         x2 + offset, y1 - 15, c2, 0)
       G.window.draw_quad(x1, y2, @frame_color,
                          x2, y2, @frame_color,
-                         x1, y2 + 15, c2,
-                         x2, y2 + 15, c2, 0)
-      if @cols < Const::MAX_COLS
-        G.window.draw_quad(x1, y1, @frame_color,
-                           x1 - 15, y1, c2,
-                           x1, y1 - 15, c2,
-                           x1 - 15, y1 - 15, c2, 0)
-        G.window.draw_quad(x1, y2, @frame_color,
-                           x1 - 15, y2, c2,
-                           x1, y2 + 15, c2,
-                           x1 - 15, y2 + 15, c2, 0)
-        G.window.draw_quad(x2, y1, @frame_color,
-                           x2 + 15, y1, c2,
-                           x2, y1 - 15, c2,
-                           x2 + 15, y1 - 15, c2, 0)
-        G.window.draw_quad(x2, y2, @frame_color,
-                           x2 + 15, y2, c2,
-                           x2, y2 + 15, c2,
-                           x2 + 15, y2 + 15, c2, 0)
-      end
+                         x1 - offset, y2 + 15, c2,
+                         x2 + offset, y2 + 15, c2, 0)
     end
     if @cols < Const::MAX_COLS
+      offset = @rows < Const::MAX_ROWS ? 15 : 0
       G.window.draw_quad(x1, y1, @frame_color,
                          x1, y2, @frame_color,
-                         x1 - 15, y1, c2,
-                         x1 - 15, y2, c2, 0)
+                         x1 - 15, y1 - offset, c2,
+                         x1 - 15, y2 + offset, c2, 0)
       G.window.draw_quad(x2, y1, @frame_color,
                          x2, y2, @frame_color,
-                         x2 + 15, y1, c2,
-                         x2 + 15, y2, c2, 0)
+                         x2 + 15, y1 - offset, c2,
+                         x2 + 15, y2 + offset, c2, 0)
     end
     
     @panel.draw(0, 480, 0)
