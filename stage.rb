@@ -73,6 +73,26 @@ class CSprite < Sprite
   end
 end
 
+class ItemEffect < GameObject
+  attr_reader :dead
+  
+  def initialize(row, col, margin, type, index)
+    super(col * Const::TILE_SIZE + margin.x + 4, row * Const::TILE_SIZE + margin.y + 4, 25, 25, "icon_#{type}")
+    @aim = Vector.new(660, 500 + index * 28)
+  end
+  
+  def update
+    move_free(@aim, 5)
+    if @speed.x == 0 && @speed.y == 0
+      @dead = true
+    end
+  end
+  
+  def draw
+    @img[0].draw(@x, @y, 0)
+  end
+end
+
 class Stage
   BLACK = 0xff000000
   WHITE = 0xffffffff
@@ -401,6 +421,7 @@ class Stage
     if item_type
       @items[item_type] ||= 0
       @items[item_type] += 1
+      @effects << ItemEffect.new(row, col, @margin, item_type, @items.keys.index(item_type))
     end
     @pieces[row][col] = nil
   end
