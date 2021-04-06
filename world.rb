@@ -2,16 +2,12 @@ require_relative 'save_menu'
 
 include MiniGL
 
-class World
+class World < Controller
   WHITE = 0xffffffff
   
   def initialize(num)
-    set_world(num)
+    super()
 
-    @water = Res.img(:map_water, true, true)
-    @water_timer = 0
-    @alpha = 255
-    
     @buttons = [
       Button.new(640, 480, nil, nil, :main_btn1) {
         ConnecMan.load_stage(@num, @cur_spot)
@@ -23,12 +19,19 @@ class World
         if ConnecMan.player.scores.empty?
           ConnecMan.show_main_menu
         else
+          set_save_cursor_points
           @state = :save
         end
       }
     ]
+    set_world(num)
+
+    @water = Res.img(:map_water, true, true)
+    @water_timer = 0
+    @alpha = 255
     @save_menu = SaveMenu.new(Proc.new {
       @state = :main
+      set_cursor_points
     })
     
     @state = :main
@@ -57,7 +60,8 @@ class World
     @man = GameObject.new(@spots[@cur_spot].x, @spots[@cur_spot].y, 0, 0, :map_man, Vector.new(-16, -54), 5, 1)
     
     set_arrow_buttons
-
+    set_cursor_points
+    
     ConnecMan.play_song(Res.song("world#{@num}", false, '.mp3'))
   end
 
@@ -77,8 +81,20 @@ class World
     end
   end
   
+  def set_cursor_points
+    set_group(@buttons + @arrow_buttons + @spot_buttons[0..@last_spot])
+  end
+  
+  def set_save_cursor_points
+    reset_current_button
+    @cursor_points = @save_menu.get_cursor_points
+    @cursor_point_index = -1
+    set_cursor_point(0)
+  end
+  
   def resume
     ConnecMan.play_song(Res.song("world#{@num}", false, '.mp3'))
+    set_cursor_points
   end
   
   def advance_level
@@ -89,6 +105,9 @@ class World
   end
 
   def update
+    super
+    set_save_cursor_points if @state == :save && @save_menu.points_refreshed
+    
     if @transition
       @timer += 1
       if @timer < 20
@@ -103,7 +122,8 @@ class World
     else
       if @state == :save
         @save_menu.update
-      else
+        set_save_cursor_points if @save_menu.points_refreshed
+      elsif ConnecMan.mouse_control
         @buttons.each(&:update)
         @spot_buttons.each_with_index do |s, i|
           s.update if i != @cur_spot && i <= @last_spot
@@ -159,5 +179,7 @@ class World
     ConnecMan.image_font.draw_text(ConnecMan.text(:score) + ConnecMan.player.scores.sum.to_s, 10, 570, 0, 0.5, 0.5, WHITE)
     
     @save_menu.draw if @state == :save
+    
+    super
   end
 end

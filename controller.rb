@@ -18,13 +18,8 @@ class Controller
     @cursor_point_index = -1
     buttons.each_with_index do |b, i|
       point = {x: b.x + b.w / 2, y: b.y + b.h / 2, button: b}
-      if horizontal
-        point[:lf] = i - 1 if i > 0
-        point[:rt] = i + 1 if i < buttons.size - 1
-      else
-        point[:up] = i - 1 if i > 0
-        point[:dn] = i + 1 if i < buttons.size - 1
-      end
+      point[horizontal ? :lf : :up] = i > 0 ? i - 1 : buttons.size - 1
+      point[horizontal ? :rt : :dn] = i < buttons.size - 1 ? i + 1 : 0
       @cursor_points << point
     end
     set_cursor_point(0)
@@ -43,15 +38,15 @@ class Controller
     point = @cursor_points[@cursor_point_index]
     return unless point
     
-    if KB.key_pressed?(Gosu::KB_SPACE)
+    if KB.key_pressed?(Gosu::KB_SPACE) || KB.key_pressed?(Gosu::KB_RETURN)
       point[:button].click
-    elsif KB.key_pressed?(Gosu::KB_UP) && point[:up]
+    elsif point[:up] && (KB.key_pressed?(Gosu::KB_UP) || KB.key_held?(Gosu::KB_UP))
       set_cursor_point(point[:up])
-    elsif KB.key_pressed?(Gosu::KB_RIGHT) && point[:rt]
+    elsif point[:rt] && (KB.key_pressed?(Gosu::KB_RIGHT) || KB.key_held?(Gosu::KB_RIGHT))
       set_cursor_point(point[:rt])
-    elsif KB.key_pressed?(Gosu::KB_DOWN) && point[:dn]
+    elsif point[:dn] && (KB.key_pressed?(Gosu::KB_DOWN) || KB.key_held?(Gosu::KB_DOWN))
       set_cursor_point(point[:dn])
-    elsif KB.key_pressed?(Gosu::KB_LEFT) && point[:lf]
+    elsif point[:lf] && (KB.key_pressed?(Gosu::KB_LEFT) || KB.key_held?(Gosu::KB_LEFT))
       set_cursor_point(point[:lf])
     end
   end

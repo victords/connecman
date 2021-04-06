@@ -1,17 +1,20 @@
 class SaveMenu
+  attr_reader :points_refreshed
+  
   def initialize(back_action = nil)
     @board = Res.img(:main_Board)
 
     text = ConnecMan.player.name == '-' ? '' : ConnecMan.player.name
     @text_field = TextField.new(260, 240, Res.font(:corbel, 32), :main_TextField, :main_TextCursor, nil, 3, 6, 10, true,
                                 text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ') { |t|
+      @points_refreshed = true if @buttons[:main][0].visible && t == '' || !@buttons[:main][0].visible && t != ''
       @buttons[:main][0].visible = t != ''
     }
     @buttons = {
       main: [
         Button.new(325, 300, ConnecMan.default_font, ConnecMan.text(:save), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
           if File.exist?("#{ConnecMan.saves_path}/#{@text_field.text}")
-            @state = :confirm
+            set_state(:confirm)
           else
             save_game
           end
@@ -25,7 +28,7 @@ class SaveMenu
           save_game
         },
         Button.new(325, 340, ConnecMan.default_font, ConnecMan.text(:no), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
-          @state = :main
+          set_state(:main)
         },
       ],
       saved: []
@@ -41,14 +44,32 @@ class SaveMenu
     @state = :main
   end
   
+  def set_state(state)
+    @state = state
+    @points_refreshed = true
+  end
+  
   def save_game
     ConnecMan.save_game(@text_field.text)
-    @state = :saved
+    set_state(:saved)
     @timer = 0
   end
   
+  def get_cursor_points
+    points = []
+    visible_buttons = @buttons[@state].select(&:visible)
+    visible_buttons.each_with_index do |b, i|
+      point = {x: b.x + b.w / 2, y: b.y + b.h / 2, button: b}
+      point[:up] = i > 0 ? i - 1 : visible_buttons.size - 1
+      point[:dn] = i < visible_buttons.size - 1 ? i + 1 : 0
+      points << point
+    end
+    points
+  end
+  
   def update
-    @buttons[@state].each(&:update)
+    @points_refreshed = false
+    @buttons[@state].each(&:update) if ConnecMan.mouse_control
     
     if @state == :main
       @text_field.update

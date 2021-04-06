@@ -35,14 +35,12 @@ class Options
       points = []
       @controls.each_with_index do |c, i|
         point = { x: c.x + c.w / 2, y: c.y + c.h / 2, button: c }
-        point[:up] = i - 1 if i > 0 && i < 12
-        point[:dn] = i + 1 if i < 12
+        point[:up] = i >= 12 ? 11 : i > 0 ? i - 1 : 12
+        point[:dn] = i >= 12 ? 0 : i + 1
         if i == 12
-          point[:up] = 11
-          point[:rt] = 13
+          point[:rt] = point[:lf] = 13
         elsif i == 13
-          point[:up] = 11
-          point[:lf] = 12
+          point[:lf] = point[:rt] = 12
         end
         points << point
       end

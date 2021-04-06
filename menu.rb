@@ -123,6 +123,7 @@ class Menu < Controller
     @controls[:continue] << Button.new(325, 420, ConnecMan.default_font, ConnecMan.text(:back), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
       set_state :play
     }
+    set_group(@controls[:continue])
   end
 
   def set_paging(state, prev_state, page_count, page = 0)
