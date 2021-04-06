@@ -1,4 +1,4 @@
-class StatusScreen
+class StatusScreen < Controller
   BLACK = 0xff000000
   SYMBOL_NAMES = [
     %w(A A),
@@ -36,6 +36,8 @@ class StatusScreen
   ]
   
   def initialize
+    super
+    
     @font = ConnecMan.default_font
     @bg = Res.img(:main_BackgroundStatus, false, true)
     @man = Res.imgs(:map_man, 5, 1)[0]
@@ -64,17 +66,27 @@ class StatusScreen
       @arrow_buttons << Button.new(384, 317, nil, nil, :main_btnUp) {
         @cur_world += 1
         set_arrow_buttons
+        set_cursor_point(1)
       }
     end
     if @cur_world > 1
       @arrow_buttons << Button.new(384, 333, nil, nil, :main_btnDown) {
         @cur_world -= 1
         set_arrow_buttons
+        set_cursor_point(@arrow_buttons.size > 1 ? 2 : 1)
       }
     end
+    
+    set_cursor_points
+  end
+  
+  def set_cursor_points
+    set_group([@ok_button] + @arrow_buttons)
   end
   
   def update
+    super
+    return unless ConnecMan.mouse_control
     @ok_button.update
     @arrow_buttons.each(&:update)
   end
@@ -124,5 +136,7 @@ class StatusScreen
     @arrow_buttons.each(&:draw)
     
     ConnecMan.image_font.draw_text_rel(ConnecMan.text(:ok), @ok_button.x + @ok_button.w / 2, @ok_button.y + @ok_button.h / 2, 0, 0.5, 0.5, 0.6, 0.6, BLACK)
+    
+    super
   end
 end
