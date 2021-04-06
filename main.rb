@@ -1,6 +1,6 @@
 require 'minigl'
 require 'rbconfig'
-require_relative 'menu'
+require_relative 'global'
 
 include MiniGL
 

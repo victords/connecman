@@ -1,8 +1,8 @@
-require_relative 'global'
 require_relative 'options'
 
-class Menu
+class Menu < Controller
   def initialize
+    super
     @bg_start = Res.img(:main_BackgroundStart, true, false, '.jpg')
 
     @controls = {
@@ -89,6 +89,14 @@ class Menu
 
   def set_state(state, play_sound = true)
     @state = state
+    if @state == :options
+      reset_current_button
+      @cursor_points = Options.get_cursor_points
+      @cursor_point_index = -1
+      set_cursor_point(0)
+    elsif @state != :instructions && @state != :about
+      set_group(@controls[@state])
+    end
     ConnecMan.play_sound('1') if play_sound
   end
 
@@ -131,15 +139,18 @@ class Menu
     if page < page_count - 1
       @controls[state] << Button.new(495, 450, ConnecMan.default_font, ConnecMan.text(:next), :main_btn3, 0xffffff, 0, 0xffff00, 0xff8000) {
         set_paging(state, prev_state, page_count, @page_index + 1)
+        set_cursor_point(@cursor_points.size > 2 ? 2 : 1)
       }
     end
+    set_group(@controls[state], true)
   end
 
   def update
+    super
     if @state == :options
       Options.update
     else
-      @controls[@state].each(&:update)
+      @controls[@state].each(&:update) if ConnecMan.mouse_control
     end
   end
 
@@ -189,5 +200,7 @@ class Menu
     else
       @controls[@state].each(&:draw) if @state != :main
     end
+    
+    super
   end
 end

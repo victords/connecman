@@ -1,6 +1,8 @@
 require 'fileutils'
 require_relative 'event'
+require_relative 'controller'
 require_relative 'opening'
+require_relative 'menu'
 require_relative 'player'
 require_relative 'world'
 require_relative 'status'
@@ -63,7 +65,6 @@ class ConnecMan
       @default_font = Res.font(:corbel, 24)
       @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZÚ', 31, 41, 30)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
-      @cursor = Res.img(:cursor_Default, true)
       @transition_effects = [
         GameObject.new(0, -300, 800, 300, :fx_transition_1),
         GameObject.new(800, 0, 400, 600, :fx_transition_2),
@@ -279,7 +280,6 @@ class ConnecMan
     def draw
       @controller.draw
       @transition_effects.each(&:draw) if @transitioning
-      @cursor.draw(Mouse.x - @cursor.width / 2, Mouse.y, 10) unless @transitioning || @controller.is_a?(Stage)
     end
   end
 end

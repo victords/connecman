@@ -30,6 +30,24 @@ class Options
         ConnecMan.sound_volume
       ]
     end
+    
+    def get_cursor_points
+      points = []
+      @controls.each_with_index do |c, i|
+        point = { x: c.x + c.w / 2, y: c.y + c.h / 2, button: c }
+        point[:up] = i - 1 if i > 0 && i < 12
+        point[:dn] = i + 1 if i < 12
+        if i == 12
+          point[:up] = 11
+          point[:rt] = 13
+        elsif i == 13
+          point[:up] = 11
+          point[:lf] = 12
+        end
+        points << point
+      end
+      points
+    end
 
     def change_setting(index, up)
       case index
@@ -68,7 +86,7 @@ class Options
     end
 
     def update
-      @controls.each(&:update)
+      @controls.each(&:update) if ConnecMan.mouse_control
     end
 
     def draw
