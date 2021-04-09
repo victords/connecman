@@ -93,7 +93,7 @@ class ItemEffect < GameObject
   end
 end
 
-class Stage
+class Stage < Controller
   BLACK = 0xff000000
   WHITE = 0xffffffff
   LIGHT_BLUE = 0xff99ccff
@@ -104,6 +104,8 @@ class Stage
   attr_reader :num
   
   def initialize(num)
+    super()
+    
     @num = num
     world = (num - 1) / 6 + 1
     @bg = Res.img("main_Background#{world}", false, false, '.jpg')
@@ -120,26 +122,26 @@ class Stage
     @buttons = {
       main: [
         Button.new(325, 550, nil, nil, :main_btn1) {
-          @state = :paused
+          set_state(:paused)
         }
       ],
       paused: [
         Button.new(325, 240, nil, nil, :main_btn1) {
-          @state = :main
+          set_state(:main)
         },
         Button.new(325, 280, nil, nil, :main_btn1) {
           @confirm_exit = false
-          @state = :confirm
+          set_state(:confirm)
         },
         Button.new(325, 320, nil, nil, :main_btn1) {
           Options.initialize {
-            @state = :paused
+            set_state(:paused)
           }
-          @state = :options
+          set_state(:options)
         },
         Button.new(325, 360, nil, nil, :main_btn1) {
           @confirm_exit = true
-          @state = :confirm
+          set_state(:confirm)
         }
       ],
       confirm: [
@@ -151,7 +153,7 @@ class Stage
           end
         },
         Button.new(325, 320, nil, nil, :main_btn1) {
-          @state = :paused
+          set_state(:paused)
         }
       ],
       dead: [
@@ -185,6 +187,19 @@ class Stage
     @items[:waveTransmitter] = item_amounts[0] if item_amounts[0] > 0
     @items[:hourglass] = item_amounts[1] if item_amounts[1] > 0
     @items[:dynamite] = item_amounts[2] if item_amounts[2] > 0
+    @item_buttons = []
+    @items.each_with_index do |(k, v), i|
+      @item_buttons << Button.new(x: 660, y: 500 + i * 28, width: 25, height: 25) {
+        if k == :waveTransmitter
+          @action = :wave_transmitter_source
+        elsif k == :dynamite
+          @action = :dynamite
+        else
+          use_hourglass
+        end
+        @selected_piece = nil
+      }
+    end
 
     @word = data[3].split(',').map(&:to_i) if data[3]
     
@@ -259,7 +274,8 @@ class Stage
       end
     end
 
-    @margin = MiniGL::Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
+    @margin = Vector.new((Const::SCR_W - @cols * Const::TILE_SIZE) / 2, (480 - @rows * Const::TILE_SIZE) / 2)
+    @cursor_position = Vector.new(@margin.x + Const::TILE_SIZE / 2, @margin.y + Const::TILE_SIZE / 2)
     @score = {
       default: 0
     }
@@ -268,7 +284,7 @@ class Stage
     @score_effects = []
     @word_effects = []
     @action = :default
-    @state = :starting
+    set_state(:starting)
     
     ConnecMan.play_song(Res.song("Main#{bgm}", false, '.mp3'))
   end
@@ -276,6 +292,18 @@ class Stage
   def restart
     ConnecMan.transition do
       start
+    end
+  end
+  
+  def set_state(state)
+    @state = state
+    if state == :options
+      reset_current_button
+      @cursor_points = Options.get_cursor_points
+      @cursor_point_index = -1
+      set_cursor_point(0)
+    elsif state != :main
+      set_group(@buttons[state] || [])
     end
   end
   
@@ -486,9 +514,34 @@ class Stage
     @word_effects.clear
   end
   
+  def add_item(type)
+    if @items[type]
+      @items[type] += 1
+    else
+      @items[type] = 1
+      @item_buttons << Button.new(x: 660, y: 500 + @items.size * 28, width: 25, height: 25) do
+        if type == :waveTransmitter
+          @action = :wave_transmitter_source
+        elsif type == :dynamite
+          @action = :dynamite
+        else
+          use_hourglass
+        end
+        @selected_piece = nil
+      end
+    end
+  end
+  
   def consume_item(type)
     @items[type] -= 1
-    @items.delete(type) if @items[type] == 0
+    if @items[type] == 0
+      index = @items.keys.index(type)
+      ((index+1)...@items.size).each do |i|
+        @item_buttons[i].set_position(@item_buttons[i].x, @item_buttons[i].y - 28)
+      end
+      @item_buttons.delete_at(index)
+      @items.delete(type)
+    end
   end
   
   def use_hourglass
@@ -499,12 +552,12 @@ class Stage
   end
   
   def die(time_up = false)
-    @state = :dead
+    set_state(:dead)
     @timer = time_up ? 59 : 0
   end
   
   def finish
-    @state = :finished
+    set_state(:finished)
     @timer = 0
     
     @score[:time] = @time_left * 5
@@ -525,26 +578,31 @@ class Stage
     end
   end
   
+  def clicked?
+    ConnecMan.mouse_control && Mouse.button_pressed?(:left) || !ConnecMan.mouse_control && (KB.key_pressed?(Gosu::KB_SPACE) || KB.key_pressed?(Gosu::KB_RETURN))
+  end
+  
   def update
     if @state == :starting
       @timer += 1
       if @timer == 120
         if !@message_shown && @num == ConnecMan.player.last_stage && !ConnecMan.player.completed && File.exist?("#{Res.prefix}img/messages/#{@num}.png")
-          @state = :start_message
+          set_state(:start_message)
           @message_shown = true
         else
-          @state = :main
+          set_state(:main)
         end
         @timer = 0
       end
     elsif @state == :start_message
       @timer += 1 if @timer < 120
-      if @timer == 120 && Mouse.button_pressed?(:left)
-        @state = :main
+      if @timer == 120 && clicked?
+        set_state(:main)
         @timer = 0
       end
     elsif @state == :options
       Options.update
+      super
       return
     elsif @state == :dead
       if @timer == 59
@@ -557,7 +615,7 @@ class Stage
       if @timer == 60
         Gosu::Song.current_song.stop
         ConnecMan.play_sound('10')
-      elsif @timer == 180 && Mouse.button_pressed?(:left)
+      elsif @timer == 180 && clicked?
         if @num == Const::LAST_STAGE
           if ConnecMan.player.completed
             ConnecMan.back_to_world_map
@@ -572,13 +630,13 @@ class Stage
             @final_piece_positions = [
               Vector.new(319, 161), Vector.new(415, 161), Vector.new(319, 257), Vector.new(415, 257)
             ]
-            @state = :final_effect
+            set_state(:final_effect)
             @timer = 0
           end
         elsif @num == ConnecMan.player.last_stage
           if @num % 6 == 0
             ConnecMan.play_sound('12')
-            @state = :finish_message
+            set_state(:finish_message)
             @timer = 0
           else
             ConnecMan.next_level
@@ -620,15 +678,21 @@ class Stage
       end
     end
     
-    @buttons[@state].each(&:update) if @buttons[@state]
+    if ConnecMan.mouse_control
+      @buttons[@state].each(&:update) if @buttons[@state]
+      @item_buttons.each(&:update)
+    elsif @state != :main || @cursor_position.y >= 480
+      super
+    end
+    
     return unless @state == :main
     
     if ConnecMan.shortcut_keys
       if KB.key_pressed?(Gosu::KB_P)
-        @state = :paused
+        set_state(:paused)
       elsif KB.key_pressed?(Gosu::KB_R)
         @confirm_exit = false
-        @state = :confirm
+        set_state(:confirm)
       elsif KB.key_pressed?(Gosu::KB_C)
         ConnecMan.mouse_control = !ConnecMan.mouse_control
       elsif KB.key_pressed?(Gosu::KB_W) && @items[:waveTransmitter]
@@ -663,8 +727,53 @@ class Stage
       end
     end
     
-    row = (Mouse.y - @margin.y) / Const::TILE_SIZE
-    col = (Mouse.x - @margin.x) / Const::TILE_SIZE
+    if ConnecMan.mouse_control
+      row = (Mouse.y - @margin.y) / Const::TILE_SIZE
+      col = (Mouse.x - @margin.x) / Const::TILE_SIZE
+    else
+      row = (@cursor_position.y - @margin.y) / Const::TILE_SIZE
+      col = (@cursor_position.x - @margin.x) / Const::TILE_SIZE
+      if KB.key_pressed?(Gosu::KB_TAB)
+        if @cursor_position.y < 480
+          @cursor_position.y += 480
+          menu_btn = @buttons[:main][0]
+          point = {x: menu_btn.x + menu_btn.w / 2, y: menu_btn.y + menu_btn.h / 2, button: menu_btn}
+          point[:rt] = point[:lf] = 1 unless @item_buttons.empty?
+          @cursor_points << point
+          @item_buttons.each_with_index do |b, i|
+            @cursor_points << {
+              x: b.x + b.w / 2,
+              y: b.y + b.h / 2,
+              button: b,
+              up: i > 0 ? i : @item_buttons.size,
+              dn: i < @item_buttons.size - 1 ? i + 2 : 1,
+              lf: 0, rt: 0
+            }
+          end
+          @cursor_point_index = -1
+          set_cursor_point(0)
+        else
+          reset_current_button
+          @cursor_position.y -= 480
+        end
+        return
+      elsif @cursor_position.y < 480
+        if row > 0 && (KB.key_pressed?(Gosu::KB_UP) || KB.key_held?(Gosu::KB_UP))
+          @cursor_position.y -= Const::TILE_SIZE
+          row -= 1
+        elsif col < @cols - 1 && (KB.key_pressed?(Gosu::KB_RIGHT) || KB.key_held?(Gosu::KB_RIGHT))
+          @cursor_position.x += Const::TILE_SIZE
+          col += 1
+        elsif row < @rows - 1 && (KB.key_pressed?(Gosu::KB_DOWN) || KB.key_held?(Gosu::KB_DOWN))
+          @cursor_position.y += Const::TILE_SIZE
+          row += 1
+        elsif col > 0 && (KB.key_pressed?(Gosu::KB_LEFT) || KB.key_held?(Gosu::KB_LEFT))
+          @cursor_position.x -= Const::TILE_SIZE
+          col -= 1
+        end
+      end
+    end
+    
     piece = row >= 0 && col >= 0 && @pieces[row] && @pieces[row][col]
     over_selectable_piece = piece && piece.selectable
     
@@ -674,24 +783,7 @@ class Stage
       @hovered_piece = nil
     end
     
-    return unless Mouse.button_pressed?(:left)
-
-    clicked_item = false
-    @items.each_with_index do |(k, v), i|
-      if Mouse.over?(660, 500 + i * 28, 25, 25)
-        if k == :waveTransmitter
-          @action = :wave_transmitter_source
-        elsif k == :dynamite
-          @action = :dynamite
-        else
-          use_hourglass
-        end
-        @selected_piece = nil
-        clicked_item = true
-        break
-      end
-    end
-    return if clicked_item
+    return unless clicked?
     
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
       unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
@@ -924,6 +1016,12 @@ class Stage
              else
                Res.img(:cursor_Default)
              end
-    cursor.draw(Mouse.x - cursor.width / 2, Mouse.y, 10)
+    if ConnecMan.mouse_control
+      cursor.draw(Mouse.x - cursor.width / 2, Mouse.y, 10)
+    elsif @state == :main && @cursor_position.y < 480
+      cursor.draw(@cursor_position.x - cursor.width / 2, @cursor_position.y, 0)
+    else
+      super
+    end
   end
 end
