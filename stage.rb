@@ -127,6 +127,7 @@ class Stage < Controller
       ],
       paused: [
         Button.new(325, 240, nil, nil, :main_btn1) {
+          @cursor_position.y -= 480 if @cursor_position.y >= 480 && !ConnecMan.mouse_control
           set_state(:main)
         },
         Button.new(325, 280, nil, nil, :main_btn1) {
@@ -172,6 +173,10 @@ class Stage < Controller
       confirm: [:yes, :no]
     }
     
+    ConnecMan.controls_changed += Proc.new {
+      @cursor_position = Vector.new(@margin.x + Const::TILE_SIZE / 2, @margin.y + Const::TILE_SIZE / 2)
+    }
+    
     start
   end
   
@@ -190,14 +195,7 @@ class Stage < Controller
     @item_buttons = []
     @items.each_with_index do |(k, v), i|
       @item_buttons << Button.new(x: 660, y: 500 + i * 28, width: 25, height: 25) {
-        if k == :waveTransmitter
-          @action = :wave_transmitter_source
-        elsif k == :dynamite
-          @action = :dynamite
-        else
-          use_hourglass
-        end
-        @selected_piece = nil
+        use_item(k)
       }
     end
 
@@ -520,16 +518,24 @@ class Stage < Controller
     else
       @items[type] = 1
       @item_buttons << Button.new(x: 660, y: 500 + @items.size * 28, width: 25, height: 25) do
-        if type == :waveTransmitter
-          @action = :wave_transmitter_source
-        elsif type == :dynamite
-          @action = :dynamite
-        else
-          use_hourglass
-        end
-        @selected_piece = nil
+        use_item(type)
       end
     end
+  end
+  
+  def use_item(type)
+    if type == :waveTransmitter
+      @action = :wave_transmitter_source
+    elsif type == :dynamite
+      @action = :dynamite
+    else
+      @time_stopped = Const::STOP_TIME_DURATION
+      @effects << HourglassEffect.new
+      @effects << TimerEffect.new
+      consume_item(:hourglass)
+    end
+    @selected_piece = nil
+    @cursor_position.y -= 480
   end
   
   def consume_item(type)
@@ -542,13 +548,6 @@ class Stage < Controller
       @item_buttons.delete_at(index)
       @items.delete(type)
     end
-  end
-  
-  def use_hourglass
-    @time_stopped = Const::STOP_TIME_DURATION
-    @effects << HourglassEffect.new
-    @effects << TimerEffect.new
-    consume_item(:hourglass)
   end
   
   def die(time_up = false)
@@ -578,11 +577,9 @@ class Stage < Controller
     end
   end
   
-  def clicked?
-    ConnecMan.mouse_control && Mouse.button_pressed?(:left) || !ConnecMan.mouse_control && (KB.key_pressed?(Gosu::KB_SPACE) || KB.key_pressed?(Gosu::KB_RETURN))
-  end
-  
   def update
+    clicked = ConnecMan.mouse_control && Mouse.button_pressed?(:left) || !ConnecMan.mouse_control && (KB.key_pressed?(Gosu::KB_SPACE) || KB.key_pressed?(Gosu::KB_RETURN))
+    
     if @state == :starting
       @timer += 1
       if @timer == 120
@@ -593,12 +590,14 @@ class Stage < Controller
           set_state(:main)
         end
         @timer = 0
+        return
       end
     elsif @state == :start_message
       @timer += 1 if @timer < 120
-      if @timer == 120 && clicked?
+      if @timer == 120 && clicked
         set_state(:main)
         @timer = 0
+        return
       end
     elsif @state == :options
       Options.update
@@ -615,7 +614,7 @@ class Stage < Controller
       if @timer == 60
         Gosu::Song.current_song.stop
         ConnecMan.play_sound('10')
-      elsif @timer == 180 && clicked?
+      elsif @timer == 180 && clicked
         if @num == Const::LAST_STAGE
           if ConnecMan.player.completed
             ConnecMan.back_to_world_map
@@ -683,6 +682,7 @@ class Stage < Controller
       @item_buttons.each(&:update)
     elsif @state != :main || @cursor_position.y >= 480
       super
+      clicked = false if @state == :main
     end
     
     return unless @state == :main
@@ -696,11 +696,11 @@ class Stage < Controller
       elsif KB.key_pressed?(Gosu::KB_C)
         ConnecMan.mouse_control = !ConnecMan.mouse_control
       elsif KB.key_pressed?(Gosu::KB_W) && @items[:waveTransmitter]
-        @action = :wave_transmitter_source
+        use_item(:waveTransmitter)
       elsif KB.key_pressed?(Gosu::KB_D) && @items[:dynamite]
-        @action = :dynamite
+        use_item(:dynamite)
       elsif KB.key_pressed?(Gosu::KB_H) && @items[:hourglass]
-        use_hourglass
+        use_item(:hourglass)
       end
     end
     
@@ -736,6 +736,7 @@ class Stage < Controller
       if KB.key_pressed?(Gosu::KB_TAB)
         if @cursor_position.y < 480
           @cursor_position.y += 480
+          @cursor_points = []
           menu_btn = @buttons[:main][0]
           point = {x: menu_btn.x + menu_btn.w / 2, y: menu_btn.y + menu_btn.h / 2, button: menu_btn}
           point[:rt] = point[:lf] = 1 unless @item_buttons.empty?
@@ -783,7 +784,7 @@ class Stage < Controller
       @hovered_piece = nil
     end
     
-    return unless clicked?
+    return if ConnecMan.mouse_control && @cursor_position.y >= 480 || !clicked
     
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
       unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
@@ -952,7 +953,7 @@ class Stage < Controller
       y = 500 + i * 28
       Res.img("icon_#{k}").draw(660, y, 0)
       @font.draw_text(v.to_s, 690, y, 0, 0.5, 0.5, WHITE)
-      if @state == :main && Mouse.over?(660, y, 25, 25)
+      if @state == :main && ConnecMan.mouse_control && Mouse.over?(660, y, 25, 25)
         Res.img(:main_ItemHighlight).draw(658, y - 2, 0)
       end
     end

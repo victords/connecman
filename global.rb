@@ -27,8 +27,8 @@ class ConnecMan
   ]
   
   class << self
-    attr_reader :saves_path, :default_font, :image_font, :text_helper, :language, :music_volume, :player
-    attr_accessor :shortcut_keys, :mouse_control, :full_screen, :sound_volume, :language_changed
+    attr_reader :saves_path, :default_font, :image_font, :text_helper, :language, :mouse_control, :music_volume, :player
+    attr_accessor :shortcut_keys, :full_screen, :sound_volume, :language_changed, :controls_changed
     
     def initialize(dir)
       Res.initialize
@@ -73,6 +73,7 @@ class ConnecMan
       ]
 
       @language_changed = Event.new
+      @controls_changed = Event.new
     end
 
     def create_options
@@ -147,6 +148,11 @@ class ConnecMan
     def language=(value)
       @language = value
       @language_changed.invoke
+    end
+    
+    def mouse_control=(value)
+      @mouse_control = value
+      @controls_changed.invoke
     end
 
     def music_volume=(value)
