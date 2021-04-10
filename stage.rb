@@ -445,8 +445,14 @@ class Stage < Controller
     ConnecMan.play_sound('6')
     item_type = @pieces[row][col].item
     if item_type
-      @items[item_type] ||= 0
-      @items[item_type] += 1
+      if @items[item_type]
+        @items[item_type] += 1
+      else
+        @item_buttons << Button.new(x: 660, y: 500 + @items.size * 28, width: 25, height: 25) {
+          use_item(item_type)
+        }
+        @items[item_type] = 1
+      end
       @effects << ItemEffect.new(row, col, @margin, item_type, @items.keys.index(item_type))
     end
     @pieces[row][col] = nil
@@ -454,7 +460,7 @@ class Stage < Controller
   
   def update_pairs(piece1, piece2, strong1, strong2)
     key = piece1 ? "#{piece1.type}|#{piece1.symbol}" : nil
-    if piece1 && !strong1
+    if piece1 && !strong1 && @pairs[key]
       @pairs[key].reverse_each do |p|
         next unless p[0] == piece1 || p[1] == piece1
         @pairs[key].delete(p)
@@ -510,17 +516,6 @@ class Stage < Controller
   def reset_word
     @word_pieces = nil
     @word_effects.clear
-  end
-  
-  def add_item(type)
-    if @items[type]
-      @items[type] += 1
-    else
-      @items[type] = 1
-      @item_buttons << Button.new(x: 660, y: 500 + @items.size * 28, width: 25, height: 25) do
-        use_item(type)
-      end
-    end
   end
   
   def use_item(type)
@@ -646,7 +641,7 @@ class Stage < Controller
       end
     elsif @state == :finish_message
       @timer += 1 if @timer < 180
-      if @timer == 180 && Mouse.button_pressed?(:left)
+      if @timer == 180 && clicked
         ConnecMan.next_world
       end
     elsif @state == :final_effect
@@ -784,11 +779,12 @@ class Stage < Controller
       @hovered_piece = nil
     end
     
-    return if ConnecMan.mouse_control && @cursor_position.y >= 480 || !clicked
+    return if !ConnecMan.mouse_control && @cursor_position.y >= 480 || !clicked
     
     if @action == :dynamite && row >= 0 && col >= 0 && row < @rows && col < @cols
       unless piece.is_a?(Rock) && !piece.fragile || piece.is_a?(Piece) && piece.type == 9
         @pieces[row][col] = nil
+        @piece_count -= 1
         update_pairs(piece.is_a?(Piece) ? piece : nil, nil, false, false)
       end
       @effects << Effect.new(col * Const::TILE_SIZE + @margin.x - 9, row * Const::TILE_SIZE + @margin.y - 9, :fx_explosion, 2, 2, 7, [0, 1, 2, 3, 2, 1, 0], nil, '9')
@@ -884,6 +880,7 @@ class Stage < Controller
       @pieces[@selected_piece.row][@selected_piece.col] = nil
       @selected_piece.move(row, col)
     else
+      reset_word
       @selected_piece = nil
       @action = :default
     end
