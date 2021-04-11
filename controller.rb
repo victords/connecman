@@ -29,7 +29,7 @@ class Controller
     reset_current_button
     @cursor_point_index = index
     new_point = @cursor_points[index]
-    new_point[:button].instance_exec { @state = :over; @img_index = 1 } if new_point && new_point[:button]
+    new_point[:button].instance_exec { @state = :over; @img_index = 1 } if new_point && new_point[:button] && !ConnecMan.mouse_control
   end
   
   def update
