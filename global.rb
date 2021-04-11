@@ -212,6 +212,7 @@ class ConnecMan
     end
 
     def save_game(name)
+      FileUtils.mkdir_p(@saves_path) unless File.exist?(@saves_path)
       File.open("#{@saves_path}/#{name}", 'w') do |f|
         f.write("#{@player.completed ? '!' : ''}##{@player.last_stage}##{@player.scores.join(',')}")
       end
