@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=ConnecMan
+GenericName=Puzzle Game
+Comment=A puzzle game about connecting pieces with straight lines.
+Icon=connecman
+Exec=ruby /opt/vds-games/connecman/main.rb
+Terminal=false
+StartupNotify=false
+Categories=Game;LogicGame
