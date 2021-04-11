@@ -857,7 +857,7 @@ class Stage < Controller
           @action = :wave_transmitter_dest
         end
       elsif @action == :wave_transmitter_dest
-        if piece.match?(@selected_piece)
+        if piece != @selected_piece && piece.match?(@selected_piece)
           add_piece_effect(piece)
           add_piece_effect(@selected_piece)
           add_wave_effects(@selected_piece, piece)
