@@ -15,6 +15,7 @@ class ConnecManWindow < GameWindow
       end
     ConnecMan.initialize(dir)
     super(Const::SCR_W, Const::SCR_H, ConnecMan.full_screen)
+    self.caption = 'ConnecMan'
 
     ConnecMan.show_presentation
   end
