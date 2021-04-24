@@ -1,9 +1,9 @@
 Package: connecman
 Priority: optional
-Version: 1.0.0
+Version: 1.1.0
 Architecture: all
 Maintainer: Victor David Santos <victordavidsantos@gmail.com>
-Installed-Size: 28964
+Installed-Size: 28968
 Depends: build-essential, libsdl2-dev, libgl1-mesa-dev, libopenal-dev, libsndfile-dev, libmpg123-dev, libgmp-dev, libfontconfig1-dev, ruby, ruby-dev
 Homepage: https://github.com/victords/connecman
 Section: games
