@@ -68,7 +68,7 @@ confirm				ARE YOU SURE?
 yes					Yes
 no					No
 time				TIME: 
-time_up				TIME UP!
+time_up				 (TIME UP)
 no_moves_left		NO MOVES LEFT!
 level_completed		LEVEL COMPLETED!
 time_bonus			TIME BONUS: 

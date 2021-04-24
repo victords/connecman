@@ -63,7 +63,7 @@ class ConnecMan
       end
 
       @default_font = Res.font(:corbel, 24)
-      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZÚ', 31, 41, 30)
+      @image_font = ImageFont.new(:font_font1, '0123456789AÁÃBCÇD:EÉ!FGH-IÍ?JKLMNÑOÓÔÕPQR¡¿STUVWXYZÚ()', 31, 41, 30)
       @text_helper = TextHelper.new(@default_font, 5, 0.75, 0.75)
       @transition_effects = [
         GameObject.new(0, -300, 800, 300, :fx_transition_1),

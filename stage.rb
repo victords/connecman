@@ -545,9 +545,9 @@ class Stage < Controller
     end
   end
   
-  def die(time_up = false)
+  def die
     set_state(:dead)
-    @timer = time_up ? 59 : 0
+    @timer = 0
   end
   
   def finish
@@ -556,7 +556,7 @@ class Stage < Controller
     
     @score[:time] = @time_left * 5
     @score[:items] = @items.values.sum * 200
-    @score[:total] = @score[:default] + @score[:time] + @score[:items]
+    @score[:total] = @time_left > 0 ? @score[:default] + @score[:time] + @score[:items] : 0
     
     player_score = ConnecMan.player.scores[@num - 1]
     if !player_score || @score[:total] > player_score
@@ -705,14 +705,12 @@ class Stage < Controller
         @time_stopped = nil
       end
     else
-      @timer += 1
-      if @timer == 60
-        @time_left -= 1
-        if @time_left == 0
-          die(true)
-          return
+      if @time_left > 0
+        @timer += 1
+        if @timer == 60
+          @time_left -= 1
+          @timer = 0
         end
-        @timer = 0
       end
 
       @pieces.each do |_, row|
@@ -944,8 +942,9 @@ class Stage < Controller
     @score_effects.each do |e|
       @font.draw_text_rel(e[:text], e[:x], e[:y] - 20 + e[:lifetime] / 3, 0, 0.5, 0.5, 0.5, 0.5, e[:color])
     end
-    @font.draw_text(ConnecMan.text(:score) + @score[:default].to_s, 50, 502, 0, 0.5, 0.5, WHITE)
-    @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, WHITE)
+    color = @time_left > 0 ? WHITE : 0xffff0000
+    @font.draw_text(ConnecMan.text(:score) + (@time_left > 0 ? @score[:default].to_s : '0'), 50, 502, 0, 0.5, 0.5, color)
+    @font.draw_text(ConnecMan.text(:time) + @time_left.to_s, 50, 558, 0, 0.5, 0.5, color)
     @items.each_with_index do |(k, v), i|
       y = 500 + i * 28
       Res.img("icon_#{k}").draw(660, y, 0)
@@ -976,12 +975,12 @@ class Stage < Controller
       @menu.draw((Const::SCR_W - @menu.width) / 2, (Const::SCR_H - @menu.height) / 2, 0)
       @font.draw_text_rel(ConnecMan.text(@state), Const::SCR_W / 2, (Const::SCR_H - @menu.height) / 2 + 25, 0, 0.5, 0, 0.5, 0.5, BLACK)
     elsif @state == :dead && @timer >= 60
-      @font.draw_text_rel(ConnecMan.text(@time_left == 0 ? :time_up : :no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
+      @font.draw_text_rel(ConnecMan.text(:no_moves_left), 400, 240, 0, 0.5, 0.5, 0.9, 0.9, 0xffff0000)
     elsif @state == :finished && @timer >= 60
       @font.draw_text_rel(ConnecMan.text(:level_completed), 400, 160, 0, 0.5, 0, 1, 1, LIGHT_BLUE)
-      @font.draw_text_rel(ConnecMan.text(:time_bonus) + @score[:time].to_s, 400, 210, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
-      @font.draw_text_rel(ConnecMan.text(:items_bonus) + @score[:items].to_s, 400, 235, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
-      @font.draw_text_rel(ConnecMan.text(:total) + @score[:total].to_s, 400, 260, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
+      @font.draw_text_rel(ConnecMan.text(:time_bonus) + @score[:time].to_s, 400, 210, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE) if @time_left > 0
+      @font.draw_text_rel(ConnecMan.text(:items_bonus) + @score[:items].to_s, 400, 235, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE) if @time_left > 0
+      @font.draw_text_rel(ConnecMan.text(:total) + @score[:total].to_s + (@time_left > 0 ? '' : ConnecMan.text(:time_up)), 400, 260, 0, 0.5, 0, 0.5, 0.5, LIGHT_BLUE)
       @font.draw_text_rel(ConnecMan.text(:new_high_score), 400, 285, 0, 0.5, 0, 0.5, 0.5, YELLOW) if @new_high_score
       @font.draw_text_rel(ConnecMan.text(:new_letters), 400, 310, 0, 0.5, 0, 0.5, 0.5, YELLOW) if @new_letters
       @font.draw_text_rel(ConnecMan.text("#{ConnecMan.mouse_control ? 'click' : 'press'}_to_continue").upcase, 400, 350, 0, 0.5, 0, 0.4, 0.4, WHITE) if @timer == 180
