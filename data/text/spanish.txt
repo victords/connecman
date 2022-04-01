@@ -21,6 +21,9 @@ instructions_5		Cuando jugando ConnecMan, no es necesario preocuparse de olvidar
 instructions_6		CONTROLES\nEn el menú Opciones, puede cambiar entre los controles del ratón y el teclado. En el caso del ratón, todos los comandos en el juego - incluyendo menús de navegación - se realizan con simples clics con el botón izquierdo. Para el teclado, a ver qué teclas se usan:\n- Direccionales (flechas) para navegar entre los elementos de menú y para mover el cursor en la pantalla principal del juego.\n- Barra espaciadora: Para llevar a cabo todas las acciones, tanto en los menús (elegir una) cuanto en el Juego (seleccionar una sola pieza, utilizar un elemento).\n- Tab: se utiliza para cambiar entre la pantalla del juego y el panel, situado en la parte inferior, y para cambiar el foco entre el campo de texto y los botones de menú de guardar juego.
 instructions_7		TECLAS DE ACCESO\nTambién en el menú Opciones, puede activarlos o desactivarlos. Cuando se activa, echa un vistazo a sus funciones:\n- C: cambia automáticamente el tipo de control (ratón o teclado).\n- P: Pausa el juego, abre el menú.\n- R: Reinicia la fase actual.\n- W: usa, si posible, un elemento 'Transmisor de Onda'.\n- H: usa, si posible, un elemento 'Reloj de Arena'.\n- D: usa, si posible, un elemento 'Dinamita'.\n\nUsted también puede utilizar Alt+Enter para cambiar entre ventana y pantalla completa en cualquier momento.
 instructions_8		Aventurero bravo, aquí termina tu tutorial sobre ConnecMan. Ahora bien, es sólo en su viaje por las islas de Nisland, a desafiar a su cerebro en 25 emocionantes niveles!
+inst_image_1		El símbolo
+inst_image_2		Nombre del símbolo
+inst_image_3		Letra equivalente
 save				Guardar
 cancel				Cancelar
 on					Sí
@@ -48,10 +51,10 @@ world_2				Isla de Cielo Nublado
 world_3				Isla de Lago Frío
 world_4				Isla de Volcaña
 world_5				Isla de los Cuatro Pilares
-player				JUGADOR: 
-score				PUNTOS: 
+player				JUGADOR:
+score				PUNTOS:
 status				Status
-level				Nivel 
+level				Nivel
 worlds_unlocked		Escenarios visitados
 crystals_collected	Cristales recogidos
 crystal_0			Tierra
@@ -67,13 +70,13 @@ resume				CONTINUAR
 confirm				¿ESTÁS SEGURO?
 yes					Sí
 no					No
-time				TIEMPO: 
+time				TIEMPO:
 time_up				 (TIEMPO AGOTADO)
 no_moves_left		¡NINGÚN MOVIMIENTO POSIBLE!
 level_completed		¡NIVEL COMPLETADO!
-time_bonus			BONO POR TIEMPO: 
-items_bonus			BONO POR ÍTENES NO UTILIZADOS: 
-total				TOTAL: 
+time_bonus			BONO POR TIEMPO:
+items_bonus			BONO POR ÍTENES NO UTILIZADOS:
+total				TOTAL:
 new_high_score		¡NUEVO RECORD!
 new_letters			¡NUEVAS LETRAS NISLED DESCUBIERTAS!
 world_completed		 - ¡Etapa Completa!

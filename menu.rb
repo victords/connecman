@@ -82,7 +82,7 @@ class Menu < Controller
 
     @board1 = Res.img(:main_Board)
     @board2 = Res.img(:main_Board2)
-    @instructions_images = Res.imgs(:main_instructions, 1, 8)
+    @instructions_images = Res.imgs(:main_instructions, 1, 6)
 
     set_state :main, false
   end
@@ -176,10 +176,11 @@ class Menu < Controller
       ConnecMan.default_font.draw_text_rel(ConnecMan.text(:no_saved_games), Const::SCR_W / 2, Const::SCR_H / 2, 0, 0.5, 0, 1, 1, 0xffffffff)
     elsif @state == :instructions
       ConnecMan.text_helper.write_breaking(ConnecMan.text("instructions_#{@page_index}"), 120, 190, 560, :justified, 0xffffff)
-      if @page_index < 5
-        @instructions_images[@page_index].draw(120, 330, 0)
-      elsif @page_index == 5
-        @instructions_images[@page_index + ConnecMan.language_index].draw(120, 330, 0)
+      @instructions_images[@page_index].draw(120, 330, 0)
+      if @page_index == 5
+        ConnecMan.text_helper.write_line(ConnecMan.text(:inst_image_1), 343, 370, :right, 0xffffff)
+        ConnecMan.text_helper.write_line(ConnecMan.text(:inst_image_2), 465, 363, :left, 0xffffff)
+        ConnecMan.text_helper.write_line(ConnecMan.text(:inst_image_3), 452, 406, :left, 0xffffff)
       end
     elsif @state == :about
       ConnecMan.text_helper.write_breaking(ConnecMan.text("about_#{@page_index}"), 120, 190, 560, :justified, 0xffffff, 255, 0, 1, 1)
@@ -201,7 +202,7 @@ class Menu < Controller
     else
       @controls[@state].each(&:draw) if @state != :main
     end
-    
+
     super
   end
 end
