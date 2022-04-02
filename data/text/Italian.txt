@@ -1,4 +1,4 @@
-lang_name			English
+lang_name			Italiano
 powered_by			Offerto da
 presents			Victor David Santos presenta...
 play				Gioca
