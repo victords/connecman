@@ -1,0 +1,110 @@
+lang_name			Italiano
+powered_by			Offerto da
+presents			Victor David Santos presenta...
+play				Gioca
+instructions		Istruzioni
+options				Opzioni
+more				Altro...
+exit				Uscita
+new_game			Nuovo gioco
+continue			Continua
+no_saved_games		Nessun gioco salvato
+back				Indietro
+previous			Precedente
+next				Prossimo
+instructions_0		Il GIOCO\nConnecMan è un puzzle game di facile comprensione. La base del gioco è collegare pezzi simili (pezzi dello stesso colore e con lo stesso simbolo) tramite 'linee di energia'. Le 'linee energetiche' sono composte da un massimo di tre segmenti (vedi sotto).
+instructions_1		Una delle caratteristiche di ConnecMan è la varietà di tipi di pezzi che troverai lungo il gioco. Oltre ai pezzi comuni (rosso, blu e verde), ci sono blocchi di pietra, che non lasciano passare nessuna "linea di energia", e blocchi di ghiaccio, che fanno lo stesso, ma puoi fonderli collegando i pezzi attorno ad essi, come mostrato di seguito:
+instructions_2		Altri pezzi che puoi collegare: pezzi forti, che devono essere collegati due volte per essere eliminati, pezzi di metallo, che valgono più punti, ma il loro valore diminuisce con il tempo, e pezzi mobili, che puoi spostare nelle direzioni indicate da piccole frecce gialle. Guarda l'immagine qui sotto:
+instructions_3		ConnecMan è composto da 25 livelli avvincenti, distribuiti da cinque fantastici scenari. L'obiettivo comune è eliminare tutti i pezzi di collegamento. Tuttavia, ci sono livelli speciali (l'ultimo di ogni scenario) che dovrai formare parole Nisled - leggi Nisled in "Informazioni", dentro "Altro..." -, usando i pezzi bianchi. Questo viene fatto collegandoli nell'ordine corretto.
+instructions_4		Per rendere ConnecMan ancora più interessante, in alcuni livelli potresti avere degli oggetti da usare, che ti aiutano a raggiungere l'obiettivo. Ci sono tre tipi di oggetti, ognuno con una funzione. Esplora i 25 livelli per scoprire i loro usi!
+instructions_5		In ConnecMan non devi preoccuparti di dimenticare di salvare il gioco: quando fai clic su "Esci", il gioco ti chiede automaticamente se salvare i tuoi progressi.\n\nNella schermata di stato, puoi vedere quanti progressi hai fatto finora. Le lettere o i numeri nisled che hai appreso sono mostrati nella parte inferiore di questa schermata, nel modo seguente:
+instructions_6		CONTROLLI\nIn 'Opzioni' puoi impostare i controlli di gioco su mouse o tastiera. Utilizzando il mouse, tutte le azioni vengono eseguite con un solo clic del pulsante sinistro. Quando impostato su tastiera, funziona come segue:\n- Tasti direzionali (frecce): naviga nei menu e sposta il cursore nell'area di gioco.\n- Barra spaziatrice: esegue un'azione (seleziona un'opzione in un menu, seleziona un pezzo o un oggetto nel gioco principale).\n- TAB: passa dalla schermata di gioco principale al pannello, che si trova sotto di esso. Utilizzato anche per passare dal campo di testo ai pulsanti nel menu di salvataggio del gioco.
+instructions_7		TASTI RAPIDI\nAnche in "Opzioni", puoi attivarli o disattivarli. Quando è attiva, le loro funzioni sono:\n- C: cambia i controlli di gioco tra mouse e tastiera.\n- P: metti in pausa il gioco e apri il menu.\n- R: riavvia il livello corrente.\n- W: seleziona, quando disponibile, un 'Trasmettitore d'onda'.\n- H: seleziona, quando disponibile, una 'Clessidra'.\n- D: seleziona, quando disponibile, una 'Dinamite'.\n\nPuoi anche usare Alt+Invio per passare dalla finestra allo schermo intero in qualsiasi momento.
+instructions_8		Coraggioso avventuriero, il tuo tutorial su ConnecMan è giunto al termine. Ora inizia il tuo viaggio attraverso le Nislands e fai lavorare il tuo cervello per risolvere i 25 enigmi!
+inst_image_1		Il simbolo
+inst_image_2		Nome del simbolo
+inst_image_3		Lettera latina equivalente
+save				Salva
+cancel				Cancella
+on					ON
+off					OFF
+general				Generale
+language			Lingua
+shortcut_keys		Tasti di scelta rapida
+controls			Controlli
+mouse				Mouse
+keyboard			Tastiera
+audio_graphics		Audio/Grafica
+full_screen			Schermo intero
+music_volume		Volume musica
+sound_volume		Volume del suono
+about				Informazioni
+hall_of_fame		Hall of Fame
+credits				Crediti
+about_0				ConnecMan è un esploratore che ha deciso di intraprendere un viaggio attraverso le misteriose Nislands. Lì, ha trovato tracce di un'antica civiltà, che sembrava avere una cultura molto ricca.\nQuindi, il suo scopo è svelare i misteri di questa civiltà e cercare di decifrare il loro bellissimo linguaggio, che ha chiamato Nisled.
+about_1				Studiando i pezzi di cristallo che ha trovato in quelle isole, ConnecMan ha scoperto che Nisled è un linguaggio interessante, perché è composto da un "alfabeto" e alcuni simboli più complessi, che generalmente rappresentano cose concrete o astratte.
+about_2				In ciascuno dei pezzi di cristallo è scolpita una lettera di Nisled o un algarismo e, combinando pezzi simili, si diffonde molta energia, rivelando parte della conoscenza lasciata da quella civiltà. Quindi, ConnecMan ha deciso di viaggiare da un'isola all'altra, combinando pezzi di cristallo per saperne di più. Ed ecco la tua parte in questa storia: aiuta ConnecMan a decifrare gli enigmi di Nisled e impara anche tu questo linguaggio eccentrico!
+no_players			Nessun giocatore nella Hall of Fame
+credits_info		Design, programmazione, grafica e musica di:\nVictor David Santos\n\nUn ringraziamento speciale a:\nJoão Carlos dos Santos\nNathália David Santos\nYuri David Santos\nZuleica Hiromi Alves\n\nIn memoria di\nLuiz Carlos dos Santos
+world_1				Isola dell'Hard Rock 
+world_2				Isola del Cielo Nuvoloso
+world_3				Isola del Lago Gelato
+world_4				Isola Vulcanica
+world_5				Isola dei Quattro Pilastri
+player				GIOCATORE: 
+score				PUNTEGGIO: 
+status				Stato
+level				Livello 
+worlds_unlocked		Mondi sbloccati
+crystals_collected	Cristalli raccolti
+crystal_0			Terra
+crystal_1			Aria
+crystal_2			Acqua
+crystal_3			Fuoco
+nisled_alphabet		Alfabeto Nisled/numeri
+ok					OK
+menu				MENU
+paused				GIOCO IN PAUSA
+restart				RIAVVIA
+resume				RIPRENDI
+confirm				SEI SICURO?
+yes					Si
+no					No
+time				TEMPO: 
+time_up				 (TIME UP)
+no_moves_left		NESSUN MOVIMENTO RIMAsto!
+level_completed		LIVELLO COMPLETATO!
+time_bonus			TIME BONUS: 
+items_bonus			OGGETTI BONUS NON UTILIZZATI: 
+total				TOTALE: 
+new_high_score		NUOVO RECORD!
+new_letters			NUOVE LETTERE NISLED APPRESE!
+world_completed		 - Scena completata!
+bonus_message		Hai scoperto una nuova parola Nisled: '$', che significa '$'.\nI pezzi bianchi si sono fusi in un grande cristallo, il $ cristallo!
+click_to_continue	Clicca per continuare
+press_to_continue	Premi la barra spaziatrice per continuare
+type_name			Scrivi un nome:
+save				Salva
+dont_save			Non salvare
+overwrite_confirm	Esiste già un gioco chiamato '$'. Vuoi sovrascriverlo?
+game_saved			Gioco salvato con successo.
+message_title_1		Pezzi di collegamento
+message_title_2		Blocchi di ghiaccio
+message_title_3		Collegati due volte!
+message_title_4		Trasmettitore d'onda
+message_title_5		Clessidra
+message_title_6		Pezzi bianchi e dinamite
+message_title_7		Pezzi di metallo
+message_title_10	Pezzi mobili
+message_title_25	La sfida finale!
+message_1			Seleziona un pezzo e poi selezionane un altro con lo stesso colore e simbolo. Il collegamento tra loro, una 'linea di energia', può essere composto al massimo da tre segmenti. I blocchi di pietra bloccheranno le linee di energia.
+message_2			I blocchi di ghiaccio funzionano allo stesso modo dei blocchi di pietra, ma possono essere eliminati collegando i pezzi attorno a loro.
+message_3			Alcuni pezzi devono essere collegati ad altri due per essere eliminati.
+message_4			Quando non è possibile formare una linea di energia tra due pezzi, può tornare utile un Trasmettitore d'Onda (tasto di scelta rapida W): trasmette l'energia necessaria per creare la connessione tra due pezzi, indipendentemente dalla loro posizione.
+message_5			Non abbastanza tempo? Quindi, basta fermarlo per alcuni secondi, utilizzando una clessidra (tasto di scelta rapida H).
+message_6			Quando vedi i pezzi bianchi sul tabellone, il tuo obiettivo è diverso: devi solo eliminarli, senza preoccuparti degli altri pezzi. Tuttavia, per farlo, devi connetterli tutti in una volta e nell'ordine corretto. E qui arriva un altro oggetto: le dinamite (tasto di scelta rapida D) possono distruggere qualsiasi cosa sul tabellone, tranne i comuni blocchi di pietra e, poiché non vuoi rendere impossibili determinati livelli, i pezzi bianchi.
+message_7			Oooooh... Che scintillanti pezzi di cristallo! Questi pezzi simili al metallo sono più preziosi, ma con il tempo diventeranno quasi come pezzi comuni. Quelli d'oro sono i più pregiati, seguiti dall'argento e poi dal bronzo.
+message_10			Alcuni pezzi possono essere spostati in determinate direzioni, contrassegnate da piccole frecce sul bordo. Per spostare un pezzo, fai clic su di esso e poi in uno spazio vuoto attorno ad esso, poiché è in una direzione in cui questo pezzo può muoversi.
+message_25			Dopo aver raccolto i cristalli dei quattro elementi, ConnecMan parte per l'ultima isola, dove trova uno strano tempio. Quindi si rende conto di essere davanti all'ultimo enigma lasciato dalla civiltà Nisled. Non lasciarti intimidire dalle dimensioni di questo puzzle e metti al lavoro il tuo cervello!
+finish_message		CONGRATULAZIONI!\nIL TUO VIAGGIO È COMPLETO!
+finish_message2		ORA PUOI ENTRARE NELLA HALL OF FAME.
