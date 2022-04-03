@@ -51,10 +51,10 @@ world_2				Ilha de Céu Nebuloso
 world_3				Ilha de Lago Gélido
 world_4				Ilha de Vulcanha
 world_5				Ilha dos Quatro Pilares
-player				JOGADOR:
-score				PONTOS:
+player				JOGADOR: 
+score				PONTOS: 
 status				Status
-level				Nível
+level				Nível 
 worlds_unlocked		Cenários visitados
 crystals_collected	Cristais coletados
 crystal_0			Terra
@@ -70,13 +70,13 @@ resume				CONTINUAR
 confirm				TEM CERTEZA?
 yes					Sim
 no					Não
-time				TEMPO:
+time				TEMPO: 
 time_up				 (TEMPO ESGOTADO)
 no_moves_left		NENHUM MOVIMENTO POSSÍVEL!
 level_completed		NÍVEL COMPLETO!
-time_bonus			BÔNUS POR TEMPO:
-items_bonus			BÔNUS POR ITENS NÃO USADOS:
-total				TOTAL:
+time_bonus			BÔNUS POR TEMPO: 
+items_bonus			BÔNUS POR ITENS NÃO USADOS: 
+total				TOTAL: 
 new_high_score		NOVO RECORDE!
 new_letters			NOVAS LETRAS NISLED DESCOBERTAS!
 world_completed		 - Cenário Completo!

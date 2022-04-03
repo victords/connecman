@@ -51,10 +51,10 @@ world_2				Isla de Cielo Nublado
 world_3				Isla de Lago Frío
 world_4				Isla de Volcaña
 world_5				Isla de los Cuatro Pilares
-player				JUGADOR:
-score				PUNTOS:
+player				JUGADOR: 
+score				PUNTOS: 
 status				Status
-level				Nivel
+level				Nivel 
 worlds_unlocked		Escenarios visitados
 crystals_collected	Cristales recogidos
 crystal_0			Tierra
@@ -70,13 +70,13 @@ resume				CONTINUAR
 confirm				¿ESTÁS SEGURO?
 yes					Sí
 no					No
-time				TIEMPO:
+time				TIEMPO: 
 time_up				 (TIEMPO AGOTADO)
 no_moves_left		¡NINGÚN MOVIMIENTO POSIBLE!
 level_completed		¡NIVEL COMPLETADO!
-time_bonus			BONO POR TIEMPO:
-items_bonus			BONO POR ÍTENES NO UTILIZADOS:
-total				TOTAL:
+time_bonus			BONO POR TIEMPO: 
+items_bonus			BONO POR ÍTENES NO UTILIZADOS: 
+total				TOTAL: 
 new_high_score		¡NUEVO RECORD!
 new_letters			¡NUEVAS LETRAS NISLED DESCUBIERTAS!
 world_completed		 - ¡Etapa Completa!

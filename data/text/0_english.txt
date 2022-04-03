@@ -51,10 +51,10 @@ world_2				Cloudy Sky Island
 world_3				Frost Lake Island
 world_4				Volcain Island
 world_5				Four Pillars Island
-player				PLAYER:
-score				SCORE:
+player				PLAYER: 
+score				SCORE: 
 status				Status
-level				Level
+level				Level 
 worlds_unlocked		Worlds unlocked
 crystals_collected	Crystals collected
 crystal_0			Earth
@@ -70,13 +70,13 @@ resume				RESUME
 confirm				ARE YOU SURE?
 yes					Yes
 no					No
-time				TIME:
+time				TIME: 
 time_up				 (TIME UP)
 no_moves_left		NO MOVES LEFT!
 level_completed		LEVEL COMPLETED!
-time_bonus			TIME BONUS:
-items_bonus			UNUSED ITEMS BONUS:
-total				TOTAL:
+time_bonus			TIME BONUS: 
+items_bonus			UNUSED ITEMS BONUS: 
+total				TOTAL: 
 new_high_score		NEW HIGH SCORE!
 new_letters			NEW NISLED LETTERS LEARNED!
 world_completed		 - Scene Completed!
