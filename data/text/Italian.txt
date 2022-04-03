@@ -21,6 +21,9 @@ instructions_5		In ConnecMan non devi preoccuparti di dimenticare di salvare il 
 instructions_6		CONTROLLI\nIn 'Opzioni' puoi impostare i controlli di gioco su mouse o tastiera. Utilizzando il mouse, tutte le azioni vengono eseguite con un solo clic del pulsante sinistro. Quando impostato su tastiera, funziona come segue:\n- Tasti direzionali (frecce): naviga nei menu e sposta il cursore nell'area di gioco.\n- Barra spaziatrice: esegue un'azione (seleziona un'opzione in un menu, seleziona un pezzo o un oggetto nel gioco principale).\n- TAB: passa dalla schermata di gioco principale al pannello, che si trova sotto di esso. Utilizzato anche per passare dal campo di testo ai pulsanti nel menu di salvataggio del gioco.
 instructions_7		TASTI RAPIDI\nAnche in "Opzioni", puoi attivarli o disattivarli. Quando è attiva, le loro funzioni sono:\n- C: cambia i controlli di gioco tra mouse e tastiera.\n- P: metti in pausa il gioco e apri il menu.\n- R: riavvia il livello corrente.\n- W: seleziona, quando disponibile, un 'Trasmettitore d'onda'.\n- H: seleziona, quando disponibile, una 'Clessidra'.\n- D: seleziona, quando disponibile, una 'Dinamite'.\n\nPuoi anche usare Alt+Invio per passare dalla finestra allo schermo intero in qualsiasi momento.
 instructions_8		Coraggioso avventuriero, il tuo tutorial su ConnecMan è giunto al termine. Ora inizia il tuo viaggio attraverso le Nislands e fai lavorare il tuo cervello per risolvere i 25 enigmi!
+inst_image_1		Il simbolo
+inst_image_2		Nome del simbolo
+inst_image_3		Lettera latina equivalente
 save				Salva
 cancel				Cancella
 on					ON
