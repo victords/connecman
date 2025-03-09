@@ -203,7 +203,7 @@ class Menu < Controller
       @controls[@state].each(&:draw) if @state != :main
     end
     
-    ConnecMan.text_helper.write_line('v1.1.1', 790, 570, :right)
+    ConnecMan.text_helper.write_line('v1.1.2', 790, 570, :right)
 
     super
   end
